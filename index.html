@@ -1119,10 +1119,21 @@
     return top < 0 || top + no.offsetHeight > innerHeight;
   }
   // glide clockwise along the curve, so over a few escapes it traces a heart
+  // On touch screens "no" only lands on these set spots around the heart (clockwise):
+  // right of "yes", lower right, lower left, left of "yes", upper-left lobe, upper-right lobe.
+  // It still glides along the heart between them.
+  const TOUCH = matchMedia("(hover: none), (pointer: coarse)").matches;
+  const SPOTS = [0.9, 1.83, 2.5, 3.78, 4.45, 5.38];
+  function nextSpot(t) {
+    const base = Math.floor(t / (Math.PI * 2)) * Math.PI * 2, r = t - base;
+    const s = SPOTS.find(v => v > r + 0.05);
+    return s !== undefined ? base + s : base + Math.PI * 2 + SPOTS[0];
+  }
+
   function run(hops = 0) {
     if (running) return;
     running = true;
-    const from = noT, to = noT + 1.15, start = performance.now(), dur = 420;
+    const from = noT, to = TOUCH ? nextSpot(noT) : noT + 1.15, start = performance.now(), dur = 420;
     const step = (now) => {
       const p = Math.min(1, (now - start) / dur);
       noT = from + (to - from) * (1 - Math.pow(1 - p, 3));
