@@ -335,7 +335,9 @@
   .p4-ambient { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
   .p4-ambient ~ .inner { position: relative; z-index: 1; }
   .drift { position: absolute; bottom: -40px; display: block; opacity: 0; }
-  .drift svg { display: block; width: 100%; height: 100%; }
+  .drift svg, .twinkle svg { display: block; width: 100%; height: 100%; }
+  .glow { position: absolute; width: 85vmax; height: 85vmax; border-radius: 50%; }
+  .twinkle { position: absolute; display: block; opacity: .1; }
 
   /* JoJo card */
   .jojo { position: relative; }
@@ -357,14 +359,6 @@
   .m2 { left: -10%; top: 22%; font-size: 18px; }
   .m3 { right: -18%; top: 2%; font-size: 20px; }
   .m4 { right: -14%; top: 34%; font-size: 15px; }
-  /* the "To Be Continued" arrow, pointing left, in the show's gold */
-  .tbc {
-    position: absolute; z-index: 3; right: -16%; bottom: -6%; rotate: -5deg; white-space: nowrap;
-    padding: 4px 9px 4px 16px; font-size: 9.5px; font-weight: 700; font-style: italic; letter-spacing: .02em;
-    color: #3d2a06; background: linear-gradient(#f4e3a1, #c9a24a);
-    clip-path: polygon(0 50%, 12px 0, 100% 0, 100% 100%, 12px 100%);
-    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .25));
-  }
   .yay-cat img { object-position: 50% 45%; }
   /* the love letter under "yay!! ♡" */
   .letter {
@@ -550,8 +544,7 @@
       <div class="yay" id="yay" hidden>
         <div class="yay-row">
           <div class="big-heart"><img class="drawn" src="assets/heart-drawn.png" alt="hand-drawn heart"></div>
-          <!-- JoJo's Bizarre Adventure card: halftone burst and speed rays behind, menacing ゴ around,
-               a "To Be Continued" arrow on the corner -->
+          <!-- JoJo's Bizarre Adventure card: halftone burst and speed rays behind, menacing ゴ around -->
           <div class="jojo">
             <div class="jojo-burst" aria-hidden="true"></div>
             <figure class="keepsake yay-cat"><img src="assets/cat.jpg" alt="black cat"></figure>
@@ -559,7 +552,6 @@
             <span class="menacing m2" aria-hidden="true">ゴ</span>
             <span class="menacing m3" aria-hidden="true">ゴ</span>
             <span class="menacing m4" aria-hidden="true">ゴ</span>
-            <span class="tbc" aria-hidden="true">To Be Continued</span>
           </div>
           <div class="big-heart mirror"><img class="drawn" src="assets/heart-drawn.png" alt=""></div>
         </div>
@@ -1257,17 +1249,47 @@
     celebrateYes();
   });
 
-  // page 4 background: a few hearts and sparkles drift slowly up, all the time
+  // page 4 background, layered back to front: big soft lavender/pink glows that wander slowly,
+  // tiny sparkles twinkling in place, and hearts, sparkles and mini lilies drifting up
   (() => {
     const amb = document.getElementById("p4Ambient");
-    for (let n = 0; n < 12; n++) {
+
+    [["179, 154, 232", 8, 12], ["249, 168, 208", 62, 38], ["201, 178, 243", 20, 70], ["255, 196, 222", 70, 82]]
+      .forEach(([rgb, x, y], k) => {
+        const g = document.createElement("span");
+        g.className = "glow";
+        g.style.left = x + "%";
+        g.style.top = y + "%";
+        g.style.background = `radial-gradient(circle, rgba(${rgb}, .32), rgba(${rgb}, 0) 68%)`;
+        amb.appendChild(g);
+        g.animate([
+          { transform: "translate(-50%, -50%) scale(1)" },
+          { transform: `translate(calc(-50% + ${k % 2 ? -50 : 50}px), calc(-50% + ${k < 2 ? 40 : -40}px)) scale(1.18)` },
+        ], { duration: 14000 + k * 3000, iterations: Infinity, direction: "alternate", easing: "ease-in-out" });
+      });
+
+    for (let n = 0; n < 16; n++) {
+      const t = document.createElement("span");
+      t.className = "twinkle";
+      const size = 6 + Math.random() * 8;
+      t.style.width = t.style.height = size + "px";
+      t.style.left = (3 + Math.random() * 94) + "%";
+      t.style.top = (6 + Math.random() * 88) + "%";
+      t.innerHTML = `<svg viewBox="0 0 24 24" fill="${n % 3 ? "#c9b2f3" : "#f3a6c8"}"><use href="#sparkle"/></svg>`;
+      amb.appendChild(t);
+      t.animate([{ opacity: 0.1, transform: "scale(.5) rotate(0deg)" }, { opacity: 0.9, transform: "scale(1) rotate(45deg)" }],
+        { duration: 1400 + Math.random() * 1800, delay: Math.random() * 3000, iterations: Infinity, direction: "alternate", easing: "ease-in-out" });
+    }
+
+    for (let n = 0; n < 18; n++) {
       const el = document.createElement("span");
       el.className = "drift";
-      const size = 10 + Math.random() * 14;
+      const lily = n % 6 === 5;
+      const size = lily ? 20 + Math.random() * 10 : 10 + Math.random() * 14;
       el.style.width = el.style.height = size + "px";
       el.style.left = (4 + Math.random() * 92) + "%";
-      el.innerHTML = n % 3 === 0
-        ? `<svg viewBox="0 0 24 24" fill="${n % 2 ? "#f3a6c8" : "#c9b2f3"}"><use href="#sparkle"/></svg>`
+      el.innerHTML = lily ? LILY
+        : n % 3 === 0 ? `<svg viewBox="0 0 24 24" fill="${n % 2 ? "#f3a6c8" : "#c9b2f3"}"><use href="#sparkle"/></svg>`
         : purpleHeart(["heartA", "heartB", "heartC"][n % 3]);
       amb.appendChild(el);
       const sway = 20 + Math.random() * 30;
@@ -1312,8 +1334,6 @@
     ], { duration: 800 + k * 140, delay: k * 200, iterations: Infinity, direction: "alternate", easing: "ease-in-out" }));
     document.querySelector(".jojo").animate([{ rotate: "-2deg" }, { rotate: "2deg" }],
       { duration: 2600, iterations: Infinity, direction: "alternate", easing: "ease-in-out" });
-    document.querySelector(".tbc").animate([{ translate: "0 0" }, { translate: "-4px 0" }],
-      { duration: 700, iterations: Infinity, direction: "alternate", easing: "ease-in-out" });
   }
 
   // after "yes": the picture at the top slowly fades, then folds away so the page closes up,
