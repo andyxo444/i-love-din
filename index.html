@@ -326,9 +326,45 @@
     margin-top: 14px; max-width: 11em; text-wrap: balance;
   }
   /* your drawn heart and the cat photo side by side, "yay!! ♡" under them */
-  .yay-row { display: flex; align-items: center; gap: 20px; }
-  .slide .yay .big-heart { width: 92px; margin-bottom: 0; }
-  .yay-cat { width: min(132px, 34vw); aspect-ratio: 4 / 5; rotate: 3deg; }
+  .yay-row { display: flex; align-items: center; gap: 16px; }
+  .slide .yay .big-heart { width: 80px; margin-bottom: 0; }
+  .yay .big-heart.mirror { scale: -1 1; }
+  .yay-cat { width: min(132px, 32vw); aspect-ratio: 4 / 5; rotate: 3deg; }
+
+  /* page 4 background: hearts and sparkles drifting up (JS) */
+  .p4-ambient { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+  .p4-ambient ~ .inner { position: relative; z-index: 1; }
+  .drift { position: absolute; bottom: -40px; display: block; opacity: 0; }
+  .drift svg { display: block; width: 100%; height: 100%; }
+
+  /* JoJo card */
+  .jojo { position: relative; }
+  .jojo > .keepsake { position: relative; z-index: 1; }
+  .jojo-burst {
+    position: absolute; inset: -26%; z-index: 0; border-radius: 50%; pointer-events: none;
+    background:
+      radial-gradient(circle, rgba(138, 82, 220, .45) 1.4px, transparent 1.9px) 0 0 / 8px 8px,
+      repeating-conic-gradient(rgba(255, 140, 190, .38) 0deg 7deg, transparent 7deg 16deg);
+    -webkit-mask: radial-gradient(closest-side, #000 45%, transparent);
+    mask: radial-gradient(closest-side, #000 45%, transparent);
+  }
+  .menacing {
+    position: absolute; z-index: 2; pointer-events: none; line-height: 1;
+    font-family: "Yu Gothic", "Hiragino Sans", "Noto Sans JP", "Meiryo", sans-serif; font-weight: 900;
+    color: #8a52dc; -webkit-text-stroke: 1.4px #1d1430; font-size: 24px; transform: skewX(-12deg);
+  }
+  .m1 { left: -18%; top: -8%; }
+  .m2 { left: -10%; top: 22%; font-size: 18px; }
+  .m3 { right: -18%; top: 2%; font-size: 20px; }
+  .m4 { right: -14%; top: 34%; font-size: 15px; }
+  /* the "To Be Continued" arrow, pointing left, in the show's gold */
+  .tbc {
+    position: absolute; z-index: 3; right: -16%; bottom: -6%; rotate: -5deg; white-space: nowrap;
+    padding: 4px 9px 4px 16px; font-size: 9.5px; font-weight: 700; font-style: italic; letter-spacing: .02em;
+    color: #3d2a06; background: linear-gradient(#f4e3a1, #c9a24a);
+    clip-path: polygon(0 50%, 12px 0, 100% 0, 100% 100%, 12px 100%);
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .25));
+  }
   .yay-cat img { object-position: 50% 45%; }
   /* the love letter under "yay!! ♡" */
   .letter {
@@ -502,6 +538,7 @@
 
   <!-- page 4 -->
   <section class="slide" aria-label="one last question">
+    <div class="p4-ambient" id="p4Ambient" aria-hidden="true"></div>
     <div class="inner">
       <figure class="keepsake dance rise" style="--i:0"><img src="assets/dance.jpg" alt="two anime characters dancing"></figure>
       <h2 class="ask rise" style="--i:1">may i be your boyfriend?</h2>
@@ -513,7 +550,18 @@
       <div class="yay" id="yay" hidden>
         <div class="yay-row">
           <div class="big-heart"><img class="drawn" src="assets/heart-drawn.png" alt="hand-drawn heart"></div>
-          <figure class="keepsake yay-cat"><img src="assets/cat.jpg" alt="black cat"></figure>
+          <!-- JoJo's Bizarre Adventure card: halftone burst and speed rays behind, menacing ゴ around,
+               a "To Be Continued" arrow on the corner -->
+          <div class="jojo">
+            <div class="jojo-burst" aria-hidden="true"></div>
+            <figure class="keepsake yay-cat"><img src="assets/cat.jpg" alt="black cat"></figure>
+            <span class="menacing m1" aria-hidden="true">ゴ</span>
+            <span class="menacing m2" aria-hidden="true">ゴ</span>
+            <span class="menacing m3" aria-hidden="true">ゴ</span>
+            <span class="menacing m4" aria-hidden="true">ゴ</span>
+            <span class="tbc" aria-hidden="true">To Be Continued</span>
+          </div>
+          <div class="big-heart mirror"><img class="drawn" src="assets/heart-drawn.png" alt=""></div>
         </div>
         <p class="yay-title">i love you forever and always ♡</p>
         <!-- shown once the top picture has faded away; each sentence fades in after the last -->
@@ -535,14 +583,19 @@
 <!-- gradients for the congratulations hearts and lilies -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
-    <linearGradient id="lilyFront" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0" stop-color="#fbf7ff"/><stop offset=".45" stop-color="#ddcbfa"/><stop offset="1" stop-color="#a98be0"/>
+    <!-- stargazer lily: white-edged petals with a deep pink heart, pale green-yellow throat -->
+    <linearGradient id="lilyEdge" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#f6e9e0"/><stop offset=".5" stop-color="#ffe9f1"/><stop offset="1" stop-color="#fff6fa"/>
     </linearGradient>
-    <linearGradient id="lilyBack" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0" stop-color="#efe4ff"/><stop offset="1" stop-color="#8a6bd1"/>
+    <linearGradient id="lilyPink" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#f5c7d6"/><stop offset=".3" stop-color="#d81f6e"/>
+      <stop offset=".75" stop-color="#e8478a"/><stop offset="1" stop-color="#f8b3cf"/>
+    </linearGradient>
+    <linearGradient id="lilyPinkBack" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#eeb6c9"/><stop offset=".35" stop-color="#bf1660"/><stop offset="1" stop-color="#ef8fb5"/>
     </linearGradient>
     <radialGradient id="lilyThroat">
-      <stop offset="0" stop-color="#f3f7dc"/><stop offset="1" stop-color="#f3f7dc" stop-opacity="0"/>
+      <stop offset="0" stop-color="#e4f2a0"/><stop offset=".6" stop-color="#f3f7c8" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="heartA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#dcc9ff"/><stop offset="1" stop-color="#9b74e3"/></linearGradient>
     <linearGradient id="heartB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c3a6f5"/><stop offset="1" stop-color="#6f47c4"/></linearGradient>
@@ -924,20 +977,25 @@
 
   /* ---------- congratulations: purple hearts and lilies ---------- */
   // gradients come from the hidden <svg> defs at the end of <body>
+  // a pink stargazer lily: six pointed petals, each white at the edges with a deep pink centre band,
+  // a darker midrib and freckles, a pale green throat, and long stamens with rust-brown anthers
   const LILY = (() => {
-    const PETAL = "M0-47C12-36 17-18 10-5 5 3-5 3-10-5-17-18-12-36 0-47Z";
-    const petals = (angles, fill) => angles.map(a => `<path d="${PETAL}" fill="${fill}" transform="rotate(${a})"/>`).join("");
-    const ribs = [30, 90, 150, 210, 270, 330].map(a => `<path d="M0-7V-38" transform="rotate(${a})"/>`).join("");
-    const spots = [90, 210, 330].map(a =>
-      `<g transform="rotate(${a})"><circle cx="2" cy="-13" r="1.3"/><circle cx="-2.5" cy="-18" r="1.1"/><circle cx="1.5" cy="-23" r="1"/></g>`).join("");
+    const EDGE = "M0-48C10-40 16-25 13-11 11-3 6 2 0 3-6 2-11-3-13-11-16-25-10-40 0-48Z";
+    const BAND = "M0-43C6-34 9-22 7.5-11 6.5-4 3.5 0 0 1-3.5 0-6.5-4-7.5-11-9-22-6-34 0-43Z";
+    const petal = (a, band) => `<g transform="rotate(${a})"><path d="${EDGE}" fill="url(#lilyEdge)"/>`
+      + `<path d="${BAND}" fill="url(#${band})" stroke="none"/>`
+      + `<path d="M0-6V-38" fill="none" stroke="#a3104c" stroke-opacity=".45" stroke-width="1"/>`
+      + `<g fill="#8d0e45" fill-opacity=".7" stroke="none"><circle cx="2.6" cy="-12" r="1.1"/><circle cx="-2.8" cy="-15" r=".9"/>`
+      + `<circle cx="3.2" cy="-19" r=".8"/><circle cx="-2" cy="-22" r=".8"/><circle cx="1.4" cy="-26" r=".6"/></g></g>`;
     const stamens = [0, 60, 120, 180, 240, 300].map(a =>
-      `<g transform="rotate(${a + 15})"><path d="M0 0V-24"/><ellipse cy="-26" rx="1.7" ry="3.4" stroke="none"/></g>`).join("");
-    return `<svg viewBox="-50 -50 100 100"><g stroke="#7a52cc" stroke-opacity=".3" stroke-width=".8">`
-      + petals([30, 150, 270], "url(#lilyBack)") + petals([90, 210, 330], "url(#lilyFront)") + `</g>`
-      + `<g stroke="#fff" stroke-opacity=".6" stroke-width="1.1" fill="none">${ribs}</g>`
-      + `<g fill="#7b4bb5" fill-opacity=".55">${spots}</g>`
-      + `<circle r="9" fill="url(#lilyThroat)"/>`
-      + `<g stroke="#efe6cf" stroke-width="1.3" fill="#d9822b">${stamens}</g></svg>`;
+      `<g transform="rotate(${a + 18})"><path d="M0 0C2-10-1-20 1-30" fill="none"/>`
+      + `<ellipse cx="1" cy="-31" rx="4" ry="1.6" fill="#8a3a1a" stroke="none" transform="rotate(${(a % 120) - 40} 1 -31)"/></g>`).join("");
+    return `<svg viewBox="-50 -50 100 100"><g stroke="#d65b8e" stroke-opacity=".35" stroke-width=".8">`
+      + [30, 150, 270].map(a => petal(a, "lilyPinkBack")).join("")
+      + [90, 210, 330].map(a => petal(a, "lilyPink")).join("") + `</g>`
+      + `<circle r="11" fill="url(#lilyThroat)"/>`
+      + `<g stroke="#d6e8a6" stroke-width="1.2">${stamens}</g>`
+      + `<path d="M0 0C-1-8 1-15 0-20" fill="none" stroke="#cfe39a" stroke-width="1.6"/><circle cy="-21" r="2.2" fill="#b9d27a"/></svg>`;
   })();
   const purpleHeart = (g) => `<svg viewBox="0 0 24 24"><path d="${HEART_PATH}" fill="url(#${g})"/>`
     + `<ellipse cx="7.6" cy="7.4" rx="2.6" ry="1.5" fill="#fff" fill-opacity=".45" transform="rotate(-35 7.6 7.4)"/></svg>`;
@@ -1184,12 +1242,79 @@
   no.addEventListener("pointerdown", (e) => { e.preventDefault(); sayNope(); run(); });
   no.addEventListener("click", (e) => { e.preventDefault(); sayNope(); run(); });
 
+  // "yes" gently breathes with a glowing ring, inviting a tap
+  const yesPulse = yes.animate([
+    { scale: 1, boxShadow: "0 8px 22px rgba(138, 107, 209, .38), 0 0 0 0 rgba(179, 154, 232, .6)" },
+    { scale: 1.06, boxShadow: "0 8px 22px rgba(138, 107, 209, .38), 0 0 0 12px rgba(179, 154, 232, 0)" },
+  ], { duration: 1400, iterations: Infinity, easing: "ease-out" });
+
   yes.addEventListener("click", () => {
+    yesPulse.cancel();
     burst(yes.getBoundingClientRect());
     zone.hidden = true;
     yay.hidden = false;
     foldAwayPicture();
+    celebrateYes();
   });
+
+  // page 4 background: a few hearts and sparkles drift slowly up, all the time
+  (() => {
+    const amb = document.getElementById("p4Ambient");
+    for (let n = 0; n < 12; n++) {
+      const el = document.createElement("span");
+      el.className = "drift";
+      const size = 10 + Math.random() * 14;
+      el.style.width = el.style.height = size + "px";
+      el.style.left = (4 + Math.random() * 92) + "%";
+      el.innerHTML = n % 3 === 0
+        ? `<svg viewBox="0 0 24 24" fill="${n % 2 ? "#f3a6c8" : "#c9b2f3"}"><use href="#sparkle"/></svg>`
+        : purpleHeart(["heartA", "heartB", "heartC"][n % 3]);
+      amb.appendChild(el);
+      const sway = 20 + Math.random() * 30;
+      el.animate([
+        { transform: "translate(0, 0) rotate(0deg)", opacity: 0 },
+        { transform: `translate(${sway}px, -30vh) rotate(20deg)`, opacity: 0.55, offset: 0.25 },
+        { transform: `translate(${-sway * 0.6}px, -70vh) rotate(-15deg)`, opacity: 0.4, offset: 0.7 },
+        { transform: `translate(${sway * 0.3}px, -110vh) rotate(10deg)`, opacity: 0 },
+      ], { duration: 9000 + Math.random() * 6000, delay: Math.random() * 9000, iterations: Infinity, easing: "linear" });
+    }
+  })();
+
+  // after "yes": pink lilies and hearts rain down, both hearts beat, and the JoJo card comes alive
+  function celebrateYes() {
+    const layer = document.createElement("div");
+    layer.className = "congrats";
+    document.body.appendChild(layer);
+    for (let n = 0; n < 28; n++) {
+      const lily = n % 5 < 3;
+      const size = lily ? 30 + Math.random() * 30 : 12 + Math.random() * 14;
+      const el = piece(lily, size);
+      el.style.left = Math.random() * innerWidth + "px";
+      el.style.top = -size + "px";
+      layer.appendChild(el);
+      const sway = 20 + Math.random() * 40, fall = innerHeight + size * 2, rot = (Math.random() * 2 - 1) * 240;
+      el.animate([
+        { transform: "translate(0, 0)", opacity: 0 },
+        { transform: `translate(${sway}px, ${fall * 0.3}px) rotate(${rot * 0.3}deg)`, opacity: 1, offset: 0.2 },
+        { transform: `translate(${-sway * 0.6}px, ${fall * 0.65}px) rotate(${rot * 0.65}deg)`, opacity: 1, offset: 0.65 },
+        { transform: `translate(${sway * 0.4}px, ${fall}px) rotate(${rot}deg)`, opacity: 0.85 },
+      ], { duration: 4200 + Math.random() * 2600, delay: 200 + Math.random() * 2400, fill: "both" });
+    }
+    setTimeout(() => layer.remove(), 9800);
+
+    document.querySelectorAll(".yay .drawn").forEach((h, k) => h.animate([
+      { scale: 1 }, { scale: 1.12, offset: 0.14 }, { scale: 1, offset: 0.28 }, { scale: 1.07, offset: 0.42 }, { scale: 1, offset: 0.6 }, { scale: 1 },
+    ], { duration: 1400, delay: k * 220, iterations: Infinity, easing: "ease-in-out" }));
+    document.querySelector(".jojo-burst").animate([{ rotate: "0deg" }, { rotate: "360deg" }],
+      { duration: 24000, iterations: Infinity });
+    document.querySelectorAll(".menacing").forEach((m, k) => m.animate([
+      { opacity: 0.25, translate: "0 5px" }, { opacity: 1, translate: "0 -5px" },
+    ], { duration: 800 + k * 140, delay: k * 200, iterations: Infinity, direction: "alternate", easing: "ease-in-out" }));
+    document.querySelector(".jojo").animate([{ rotate: "-2deg" }, { rotate: "2deg" }],
+      { duration: 2600, iterations: Infinity, direction: "alternate", easing: "ease-in-out" });
+    document.querySelector(".tbc").animate([{ translate: "0 0" }, { translate: "-4px 0" }],
+      { duration: 700, iterations: Infinity, direction: "alternate", easing: "ease-in-out" });
+  }
 
   // after "yes": the picture at the top slowly fades, then folds away so the page closes up,
   // then the letter appears one sentence at a time (Web Animations: plays with reduced motion on too)
