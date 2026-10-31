@@ -321,7 +321,10 @@
   .nope.below::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: var(--accent-deep); }
   .yay { display: flex; flex-direction: column; align-items: center; margin-top: 30px; }
   .yay[hidden] { display: none; }
-  .yay-title { font-family: var(--serif); font-weight: 700; font-size: clamp(40px, 10vw, 64px); margin-top: 10px; }
+  .yay-title {
+    font-family: var(--serif); font-weight: 700; font-size: clamp(28px, 7vw, 46px); line-height: 1.15;
+    margin-top: 14px; max-width: 11em; text-wrap: balance;
+  }
   /* your drawn heart and the cat photo side by side, "yay!! ♡" under them */
   .yay-row { display: flex; align-items: center; gap: 20px; }
   .slide .yay .big-heart { width: 92px; margin-bottom: 0; }
@@ -512,7 +515,7 @@
           <div class="big-heart"><img class="drawn" src="assets/heart-drawn.png" alt="hand-drawn heart"></div>
           <figure class="keepsake yay-cat"><img src="assets/cat.jpg" alt="black cat"></figure>
         </div>
-        <p class="yay-title">yay!! ♡</p>
+        <p class="yay-title">i love you forever and always ♡</p>
         <!-- shown once the top picture has faded away; each sentence fades in after the last -->
         <div class="letter" id="letter" hidden>
           <p><span>i pinky promise to love and cherish your pretty little heart for as long as you’ll let me.</span>
