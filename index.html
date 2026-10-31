@@ -61,19 +61,6 @@
   .count i { font-style: normal; color: var(--faint); font-weight: 400; margin: 0 3px; }
   .grip { width: 22px; height: 2px; border-radius: 2px; background: var(--faint); }
 
-  /* ---------- bottom dots ---------- */
-  .dots {
-    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
-    z-index: 10; display: flex; gap: 6px;
-  }
-  .dots button { width: 6px; height: 18px; display: flex; align-items: center; transition: width .35s var(--ease); }
-  .dots button::before {
-    content: ""; width: 100%; height: 6px; border-radius: 999px;
-    background: #e2d9f3; transition: background-color .35s;
-  }
-  .dots button[aria-current="true"] { width: 24px; }
-  .dots button[aria-current="true"]::before { background: var(--accent); }
-
   /* ---------- slides ---------- */
   /* page switches are animated in go() with Web Animations, so they play with reduced motion on too */
   .slide {
@@ -584,7 +571,6 @@
   </section>
 </main>
 
-<div class="dots" id="dots"></div>
 
 <!-- gradients for the congratulations hearts and lilies -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -705,16 +691,9 @@
   const prev = document.getElementById("prev");
   const next = document.getElementById("next");
   const cur = document.getElementById("cur");
-  const dots = document.getElementById("dots");
   let index = 0;
 
   document.getElementById("total").textContent = slides.length;
-  slides.forEach((_, i) => {
-    const d = document.createElement("button");
-    d.setAttribute("aria-label", `page ${i + 1}`);
-    d.addEventListener("click", () => go(i));
-    dots.appendChild(d);
-  });
 
   // page switch: the old page fades and drifts the other way, the new one slides in a little
   // and its pieces (.rise) come up one after another
@@ -760,7 +739,6 @@
         { opacity: 1, transform: "none" },
       ], { duration: 700, delay: 140 + (parseInt(el.style.getPropertyValue("--i"), 10) || 0) * 90, easing: PAGE_EASE, fill: "backwards" }));
     }
-    [...dots.children].forEach((d, i) => d.setAttribute("aria-current", i === index));
     prev.disabled = index === 0;
     next.disabled = index === slides.length - 1;
     cur.textContent = index + 1;
