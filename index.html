@@ -1,0 +1,1183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>hi baby :3</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23a68ad8' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* all text is true black; lavender stays the accent */
+    --ink: #000;
+    --ink-2: #000;
+    --muted: #000;
+    --faint: #c9bde2;
+    --accent: #b39ae8;
+    --accent-deep: #8a6bd1;
+    --accent-soft: #f1ebfc;
+    --shadow: 90, 60, 150;
+    --bg: #fff;
+    --serif: "Playfair Display", Georgia, serif;
+    --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --ease: cubic-bezier(.2, .7, .2, 1);
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+  button {
+    font: inherit; color: inherit; background: none; border: 0; padding: 0;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  /* ---------- top pager ---------- */
+  .pager {
+    position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+    z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 9px;
+  }
+  .pill {
+    display: flex; align-items: center; gap: 4px; height: 46px; padding: 0 7px;
+    background: #fff; border: 1px solid #ece5f8; border-radius: 999px;
+    box-shadow: 0 6px 22px rgba(var(--shadow), .1);
+  }
+  .pill button {
+    width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%;
+    transition: background .2s, opacity .2s;
+  }
+  .pill button { color: var(--ink); }
+  .pill button:hover:not(:disabled) { background: var(--accent-soft); }
+  .pill button:disabled { opacity: .3; cursor: default; }
+  .pill svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .count { min-width: 46px; text-align: center; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .count i { font-style: normal; color: var(--faint); font-weight: 400; margin: 0 3px; }
+  .grip { width: 22px; height: 2px; border-radius: 2px; background: var(--faint); }
+
+  /* ---------- bottom dots ---------- */
+  .dots {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+    z-index: 10; display: flex; gap: 6px;
+  }
+  .dots button { width: 6px; height: 18px; display: flex; align-items: center; transition: width .35s var(--ease); }
+  .dots button::before {
+    content: ""; width: 100%; height: 6px; border-radius: 999px;
+    background: #e2d9f3; transition: background-color .35s;
+  }
+  .dots button[aria-current="true"] { width: 24px; }
+  .dots button[aria-current="true"]::before { background: var(--accent); }
+
+  /* ---------- slides ---------- */
+  /* page switches are animated in go() with Web Animations, so they play with reduced motion on too */
+  .slide {
+    position: fixed; inset: 0; overflow-y: auto; overflow-x: hidden;
+    display: flex; flex-direction: column; padding: 112px 16px 72px;
+    opacity: 0; visibility: hidden;
+  }
+  .slide.is-active, .slide.is-leaving { opacity: 1; visibility: visible; }
+  .slide.is-leaving { pointer-events: none; }
+  .inner {
+    margin: auto; width: 100%;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+
+  .label {
+    font-size: 11.5px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: var(--muted);
+  }
+
+  /* ---------- page 1 ---------- */
+  /* andy's hand-drawn heart: sketches itself in clockwise, then beats */
+  @property --sketch { syntax: "<angle>"; inherits: false; initial-value: 360deg; }
+  .big-heart { position: relative; width: 118px; margin-bottom: 20px; }
+  /* a faint lavender glow behind the drawn heart, and three tiny sparkles that twinkle (JS) */
+  .big-heart::before {
+    content: ""; position: absolute; inset: -22%; z-index: -1; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(179, 154, 232, .22), transparent);
+  }
+  .sparkle { position: absolute; fill: #bfa4f0; overflow: visible; }
+  .s1 { width: 14px; left: -16%; top: 10%; }
+  .s2 { width: 18px; right: -20%; top: 34%; }
+  .s3 { width: 10px; left: -4%; bottom: 8%; }
+  .mini-heart { width: 12px; height: 12px; margin-left: 5px; vertical-align: -1px; fill: var(--accent); }
+  .drawn {
+    display: block; width: 100%; height: auto;
+    -webkit-mask: conic-gradient(from 0deg at 50% 45%, #000 var(--sketch), transparent 0);
+    mask: conic-gradient(from 0deg at 50% 45%, #000 var(--sketch), transparent 0);
+    animation: sketch 1.3s ease-in-out .25s both, beat 2.6s ease-in-out 1.8s infinite;
+  }
+  @keyframes sketch { from { --sketch: 0deg; } }
+  @keyframes beat {
+    0%, 52%, 100% { transform: scale(1); }
+    12% { transform: scale(1.08); }
+    24% { transform: scale(1); }
+    36% { transform: scale(1.05); }
+  }
+  .title {
+    font-family: var(--serif); font-weight: 700; letter-spacing: -.01em;
+    font-size: clamp(54px, 13vw, 96px); line-height: 1.05; margin: 20px 0 22px;
+  }
+  .from { font-size: 15px; color: var(--muted); }
+  .from strong { color: var(--ink-2); font-weight: 600; }
+
+  /* photo cards on pages 1 and 4 (rotate is its own property so .rise's transform can't undo it) */
+  .keepsake {
+    margin: 0; padding: 6px; background: #fff; border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(var(--shadow), .22);
+  }
+  .keepsake img {
+    display: block; width: 100%; height: 100%; object-fit: cover;
+    border-radius: 9px; background: var(--accent-soft);
+  }
+  .cat { position: relative; width: min(180px, 48vw); aspect-ratio: 4 / 5; margin-top: 54px; rotate: -3deg; }
+  .cat > .keepsake { position: relative; z-index: 1; height: 100%; }
+  .cat img { object-position: 50% 50%; image-rendering: pixelated; }  /* minecraft: keep the pixels crisp */
+  .cat-ear { position: absolute; z-index: 0; width: 28%; bottom: 87%; overflow: visible; transform-origin: 50% 100%; }
+  .cat-ear-l { left: 11%; rotate: -14deg; }
+  .cat-ear-r { right: 11%; rotate: 14deg; }
+  /* tail starts hidden behind the card's right side and curls out; whiskers sit in front */
+  .cat-tail { position: absolute; z-index: 0; width: 42%; right: -27%; bottom: 4%; overflow: visible; transform-origin: 8% 92%; }
+  /* the roots overlap the card a little, so they read as growing from it rather than floating beside it */
+  .whiskers { position: absolute; z-index: 2; width: 37%; top: 50%; translate: 0 -50%; overflow: visible; }  /* centered on the card */
+  .whiskers-l { left: -30%; transform-origin: 100% 50%; }
+  .whiskers-r { right: -30%; transform-origin: 0% 50%; }  /* mirrored inside the svg, so it pivots at the card edge */
+  .dance { width: min(250px, 52vw); aspect-ratio: 4 / 3; margin-bottom: 20px; rotate: 2deg; }
+
+  /* ---------- page 2 ---------- */
+  .heading {
+    font-family: var(--serif); font-style: italic; font-weight: 500; color: var(--ink);
+    font-size: clamp(25px, 6.6vw, 34px); line-height: 1.2; max-width: 15em; text-wrap: balance;
+  }
+  /* opened counter: one mini heart per favorite thing, plus a number that rolls like an odometer */
+  .tally { margin-top: 12px; display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  .pips { display: flex; gap: 5px; }
+  .pip { display: block; width: 13px; height: 13px; }
+  .pip svg { display: block; width: 100%; height: 100%; fill: #ece4fb; stroke: #d6c8f1; stroke-width: 1.4; }
+  .pip.on svg { fill: #8a52dc; stroke: #5b2aa6; }
+  .sub { font-size: 13px; color: var(--muted); min-height: 1.3em; }
+  .tick { display: inline-grid; overflow: hidden; vertical-align: bottom; min-width: .65em; }
+  .tick b { grid-area: 1 / 1; color: var(--ink); font-weight: 700; }
+
+  .heart-wrap { position: relative; width: min(420px, 100%); margin: 18px auto 4px; }
+  /* silver chain rendered in Blender; a conic mask sweeps it in clockwise from the top */
+  @property --reveal { syntax: "<angle>"; inherits: false; initial-value: 360deg; }
+  .chain {
+    position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+    -webkit-mask: conic-gradient(from 0deg at 50% 48%, #000 var(--reveal), transparent 0);
+    mask: conic-gradient(from 0deg at 50% 48%, #000 var(--reveal), transparent 0);
+  }
+  .slide.is-active .chain { animation: reveal 1.6s ease-in-out .15s both; }
+  @keyframes reveal { from { --reveal: 0deg; } }
+  .slide.is-active .is-complete .chain { animation: shine 1.4s ease-in-out; }
+  @keyframes shine { 50% { filter: brightness(1.25) drop-shadow(0 0 7px rgba(179, 154, 232, .9)); } }
+
+  .snap {
+    position: absolute; margin: 0; padding: 5px; background: #fff; border-radius: 12px;
+    box-shadow: 0 10px 26px rgba(var(--shadow), .2); transform: rotate(-2.5deg);
+  }
+  /* photos stack inside the card so a new one can fade in over the old */
+  .snap img {
+    position: absolute; inset: 5px; width: calc(100% - 10px); height: calc(100% - 10px);
+    object-fit: cover; object-position: 50% 35%;
+    border-radius: 8px; background: var(--accent-soft); transition: opacity .45s ease;
+  }
+  .snap img.incoming { opacity: 0; }
+  .slide.is-active .snap { animation: fade 1s ease .45s both; }
+  @keyframes fade { from { opacity: 0; } }
+
+  .bead {
+    position: absolute; width: 56px; height: 56px; transform: translate(-50%, -50%);
+    display: grid; place-items: center;
+  }
+  /* Blender-rendered charms: bright red when closed, deep wine with a lavender glow once opened */
+  .bead .charm {
+    position: absolute; inset: -20%; width: 140%; height: 140%;  /* room for ears, whiskers and tail */
+    filter: drop-shadow(0 3px 5px rgba(50, 15, 100, .28));
+    transition: opacity .35s, transform .3s var(--ease);
+  }
+  .bead .charm-open { opacity: 0; }
+  .bead.is-open .charm-open {
+    opacity: 1;
+    filter: drop-shadow(0 0 5px rgba(179, 154, 232, .95)) drop-shadow(0 3px 5px rgba(50, 15, 100, .28));
+  }
+  .bead span {
+    position: relative; margin-top: -3px;
+    font-family: var(--serif); font-weight: 700; font-size: 19px; color: #fff;
+    /* a full outline, so the number stays readable over white patches (tuxedo, calico, dots) */
+    text-shadow: -1px -1px 0 #2b0f55, 1px -1px 0 #2b0f55, -1px 1px 0 #2b0f55, 1px 1px 0 #2b0f55,
+                 0 2px 3px rgba(35, 10, 70, .6);
+  }
+  .bead span.long { font-size: 15px; letter-spacing: -.02em; }  /* three-digit names like 444 */
+  @media (max-width: 400px) {
+    .bead { width: 44px; height: 44px; }
+    .bead span { font-size: 17px; }
+    .bead span.long { font-size: 13px; }
+  }
+  .bead:hover .charm { transform: scale(1.08); }
+  .ripple { position: absolute; inset: 4%; border-radius: 50%; border: 2px solid rgba(179, 154, 232, .9); pointer-events: none; }
+  .bead.is-current .charm { transform: scale(1.18); }
+  .slide.is-active .bead { animation: pop .55s cubic-bezier(.3, 1.6, .5, 1) both; animation-delay: calc(var(--i) * 70ms + 750ms); }
+  @keyframes pop { from { opacity: 0; transform: translate(-50%, -50%) scale(.3); } }
+
+  .note { width: 100%; max-width: 640px; min-height: 92px; margin-top: 14px; padding: 0 8px; }
+  /* font size is set per note by fitNote() */
+  .note-text {
+    font-family: var(--serif); font-style: italic; color: var(--ink);
+    font-size: 23px; line-height: 1.35; margin-top: 10px; text-wrap: balance;
+  }
+  .note-text.is-empty { color: var(--faint); }
+  .note.swap { animation: rise .5s var(--ease) both; }
+
+  /* congratulations overlay once all 10 are open (pieces and timing live in congrats()) */
+  .congrats {
+    position: fixed; inset: 0; z-index: 30; pointer-events: none; overflow: hidden;
+    display: grid; place-items: center;
+  }
+  .congrats-title {
+    position: relative; z-index: 1; padding: 0 16px; text-align: center;
+    font-family: var(--serif); font-style: italic; font-weight: 600; color: var(--ink);
+    font-size: clamp(38px, 9vw, 68px); text-shadow: 0 0 18px #fff, 0 0 34px rgba(179, 154, 232, .9);
+  }
+  .confetti { position: absolute; display: block; }
+  .confetti svg { display: block; width: 100%; height: 100%; }
+
+  /* ---------- page 3: a bunny gift ---------- */
+  .bunny { position: relative; display: block; width: 76px; margin-bottom: 6px; touch-action: manipulation; }
+  .bunny svg { display: block; width: 100%; height: auto; overflow: visible; transform-origin: 50% 100%; }
+  .bunny:hover svg { scale: 1.05; }
+  .b-ear, .b-cheeks { transform-box: fill-box; transform-origin: 50% 100%; }
+  .b-cheeks { transform-origin: 50% 50%; }
+  .bunny-heart { position: absolute; left: 50%; top: 22%; width: 14px; height: 14px; pointer-events: none; }
+  .bunny-heart svg { display: block; width: 100%; height: 100%; }
+  .gifts { display: flex; gap: 22px; justify-content: center; margin-top: 64px; }  /* room for the ears */
+  /* each card: bunny ears peeking from behind the top, paws holding the bottom edge */
+  .gift { position: relative; width: min(190px, 38vw); aspect-ratio: 3 / 4; }
+  .gift:first-child { rotate: -3deg; }
+  .gift:last-child { rotate: 3deg; }
+  .gift > .keepsake { position: relative; z-index: 1; height: 100%; }
+  .ear { position: absolute; z-index: 0; width: 22%; bottom: 84%; overflow: visible; transform-origin: 50% 92%; }
+  .ear-l { left: 17%; rotate: -10deg; }
+  .ear-r { right: 17%; rotate: 9deg; }
+  .gift:last-child .ear-r { rotate: 48deg; }  /* one floppy ear */
+  .paw { position: absolute; z-index: 2; width: 21%; bottom: -7%; overflow: visible; }
+  .paw-l { left: 19%; }
+  .paw-r { right: 19%; }
+  .placeholder {
+    height: 100%; border-radius: 9px; border: 1.5px dashed #cdbcf0;
+    background: radial-gradient(circle at 50% 40%, #fbf8ff, #ebe1fc);
+    display: grid; place-content: center; justify-items: center; gap: 8px;
+    font-size: 11.5px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: var(--ink);
+  }
+  .placeholder svg { width: 46px; height: auto; overflow: visible; }
+  .hops { display: flex; gap: 14px; margin-top: 18px; }
+  .print { width: 16px; height: 16px; fill: #c9b2f3; }
+  .print:nth-child(odd) { translate: 0 7px; rotate: 80deg; }
+  .print:nth-child(even) { rotate: 100deg; }
+  .love-line {
+    font-family: var(--serif); font-weight: 700; letter-spacing: -.01em;
+    font-size: clamp(28px, 7vw, 44px); line-height: 1.15; margin-top: 30px; max-width: 12em; text-wrap: balance;
+  }
+
+  /* ---------- page 4 ---------- */
+  .ask {
+    font-family: var(--serif); font-weight: 700; letter-spacing: -.01em; color: var(--ink);
+    font-size: clamp(38px, 9.5vw, 68px); line-height: 1.08; max-width: 9.5em; text-wrap: balance;
+  }
+  .ask-zone { position: relative; width: min(420px, 100%); margin-top: 22px; }
+  .ask-zone[hidden] { display: none; }
+  .btn {
+    position: absolute; left: 0; top: 0; height: 48px; padding: 0 24px; border-radius: 999px;
+    font-size: 16px; font-weight: 600; letter-spacing: .02em; white-space: nowrap;
+  }
+  .btn-yes {
+    background: linear-gradient(135deg, #b9a0f0, var(--accent-deep)); color: #fff;
+    box-shadow: 0 8px 22px rgba(138, 107, 209, .38);
+    transition: transform .2s var(--ease), box-shadow .2s;
+  }
+  .btn-yes:hover { transform: scale(1.06); box-shadow: 0 10px 28px rgba(138, 107, 209, .5); }
+  .btn-no {
+    background: #fff; color: var(--ink-2); border: 1px solid #ddd2f3;
+    box-shadow: 0 6px 18px rgba(var(--shadow), .1);
+  }
+  /* what "no" says when someone goes for it */
+  .nope {
+    position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none; white-space: nowrap;
+    padding: 8px 13px; border-radius: 12px; background: var(--accent-deep); color: #fff;
+    font-size: 13px; font-weight: 600; box-shadow: 0 8px 20px rgba(var(--shadow), .25);
+    opacity: 0; transform: translateY(4px); transition: opacity .2s, transform .2s;
+  }
+  .nope.show { opacity: 1; transform: none; }
+  .nope::after {
+    content: ""; position: absolute; left: var(--tail, 50%); top: 100%; margin-left: -6px;
+    border: 6px solid transparent; border-top-color: var(--accent-deep);
+  }
+  .nope.below::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: var(--accent-deep); }
+  .yay { display: flex; flex-direction: column; align-items: center; margin-top: 30px; }
+  .yay[hidden] { display: none; }
+  .yay-title { font-family: var(--serif); font-weight: 700; font-size: clamp(40px, 10vw, 64px); margin-top: 10px; }
+  /* your drawn heart and the cat photo side by side, "yay!! ♡" under them */
+  .yay-row { display: flex; align-items: center; gap: 20px; }
+  .slide .yay .big-heart { width: 92px; margin-bottom: 0; }
+  .yay-cat { width: min(132px, 34vw); aspect-ratio: 4 / 5; rotate: 3deg; }
+  .yay-cat img { object-position: 50% 45%; }
+  .burst { position: fixed; width: 34px; height: 34px; pointer-events: none; z-index: 20; }
+
+  /* short screens (small phones, laptop windows): shrink the pictures so pages still fit */
+  @media (max-height: 760px) {
+    .slide { padding-top: 100px; padding-bottom: 60px; }
+    .slide .big-heart { width: 80px; margin-bottom: 12px; }
+    .title { font-size: clamp(46px, 11vw, 80px); margin: 14px 0 16px; }
+    .cat { width: min(130px, 36vw); margin-top: 34px; }
+    .dance { width: min(150px, 40vw); margin-bottom: 12px; }
+    .ask { font-size: clamp(30px, 7vw, 46px); }
+    .ask-zone { margin-top: 12px; }
+    .yay { margin-top: 16px; }
+    .slide .yay .big-heart { width: 72px; }
+    .yay-cat { width: min(110px, 30vw); }
+    .bunny { width: 48px; margin-bottom: 2px; }
+    .gifts { margin-top: 56px; }
+    .gift { width: min(132px, 33vw); }
+    .love-line { margin-top: 22px; }
+    .hops { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* "transition: none", not a tiny duration: a duration turns every style change into a
+       transition, so size measurements (fitNote, the runaway button) read stale values */
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="pager" aria-label="pages">
+  <div class="pill">
+    <button id="prev" aria-label="previous page"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+    <div class="count"><span id="cur">1</span><i>/</i><span id="total">2</span></div>
+    <button id="next" aria-label="next page"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+  </div>
+  <div class="grip"></div>
+</nav>
+
+<main>
+  <!-- page 1 -->
+  <section class="slide" aria-label="hi baby">
+    <div class="inner">
+      <div class="big-heart rise" style="--i:0">
+        <img class="drawn" src="assets/heart-drawn.png" alt="hand-drawn heart">
+        <svg class="sparkle s1" viewBox="0 0 24 24" aria-hidden="true"><use href="#sparkle"/></svg>
+        <svg class="sparkle s2" viewBox="0 0 24 24" aria-hidden="true"><use href="#sparkle"/></svg>
+        <svg class="sparkle s3" viewBox="0 0 24 24" aria-hidden="true"><use href="#sparkle"/></svg>
+      </div>
+      <p class="label rise" style="--i:1">to din lopez</p>
+      <h1 class="title rise" style="--i:2">hi baby :3</h1>
+      <p class="from rise" style="--i:3">from <strong>andy sim</strong><svg class="mini-heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></p>
+      <!-- the cat photo is dressed as a cat: ears peeking over the top, a tail curling out from
+           behind, whiskers out the sides -->
+      <div class="cat rise" style="--i:4">
+        <svg class="cat-tail" viewBox="0 0 70 90" aria-hidden="true">
+          <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 82C28 88 52 78 57 57 61 39 49 27 40 33c-7 4-2 15 7 10" stroke="#000" stroke-width="15"/>
+            <path d="M6 82C28 88 52 78 57 57 61 39 49 27 40 33c-7 4-2 15 7 10" stroke="#2a2233" stroke-width="10"/>
+            <path d="M14 82C32 84 49 75 53 57" stroke="#6d5f80" stroke-width="2.4" stroke-opacity=".6"/>
+          </g>
+        </svg>
+        <svg class="cat-ear cat-ear-l" viewBox="0 0 40 48" aria-hidden="true"><use href="#catEar"/></svg>
+        <svg class="cat-ear cat-ear-r" viewBox="0 0 40 48" aria-hidden="true"><use href="#catEar"/></svg>
+        <figure class="keepsake"><img src="assets/us.jpg" alt="us in minecraft"></figure>
+        <svg class="whiskers whiskers-l" viewBox="0 0 60 34" aria-hidden="true"><use href="#whiskers"/></svg>
+        <svg class="whiskers whiskers-r" viewBox="0 0 60 34" aria-hidden="true"><use href="#whiskers" transform="matrix(-1 0 0 1 60 0)"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- page 2 -->
+  <section class="slide" aria-label="10 things that i love about my baby">
+    <div class="inner">
+      <h2 class="heading rise" style="--i:0">10 things that i love about my baby &lt;3</h2>
+      <div class="tally rise" style="--i:1">
+        <div class="pips" id="pips" aria-hidden="true"></div>
+        <p class="sub" id="sub" aria-live="polite">tap a heart to open it</p>
+      </div>
+      <div class="heart-wrap" id="heartWrap">
+        <img class="chain" src="assets/3d/chain.webp" alt="">
+      </div>
+      <div class="note" id="note" aria-live="polite">
+        <p class="label" id="noteLabel"></p>
+        <p class="note-text" id="noteText"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- page 3 -->
+  <section class="slide" aria-label="a little gift">
+    <div class="inner">
+      <!-- tap the bunny: drawn inline (not <use>) so its ears, eyes and cheeks can move on their own -->
+      <button class="bunny rise" style="--i:0" id="bunny" aria-label="boop the bunny">
+        <svg viewBox="0 0 100 104" aria-hidden="true">
+          <g class="b-ear b-ear-l">
+            <path d="M35 50C25 48 20 30 22 16 23 6 28 2 32 4c5 3 9 16 9 30 0 9-2 16-6 16Z" fill="url(#bunFur)" stroke="#1d1430" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M33.5 42c-4.5-2-6.5-13-5.5-22 .5-6 3-9 5-8 3 2 5 10 5 19 0 7-1.5 11-4.5 11Z" fill="url(#bunPink)"/>
+          </g>
+          <g class="b-ear b-ear-r">
+            <path d="M65 50c10-2 15-20 13-34-1-10-6-14-10-12-5 3-9 16-9 30 0 9 2 16 6 16Z" fill="url(#bunFur)" stroke="#1d1430" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M66.5 42c4.5-2 6.5-13 5.5-22-.5-6-3-9-5-8-3 2-5 10-5 19 0 7 1.5 11 4.5 11Z" fill="url(#bunPink)"/>
+          </g>
+          <ellipse cx="50" cy="71" rx="36" ry="29" fill="url(#bunFur)" stroke="#1d1430" stroke-width="3"/>
+          <g class="b-cheeks" fill="#f9a8d0" fill-opacity=".75">
+            <ellipse cx="27.5" cy="79" rx="7" ry="4.5"/><ellipse cx="72.5" cy="79" rx="7" ry="4.5"/>
+          </g>
+          <g class="b-eyes">
+            <circle cx="37" cy="69" r="4.8" fill="#1d1430"/><circle cx="38.7" cy="67.3" r="1.7" fill="#fff"/>
+            <circle cx="63" cy="69" r="4.8" fill="#1d1430"/><circle cx="64.7" cy="67.3" r="1.7" fill="#fff"/>
+          </g>
+          <!-- happy ^ ^ eyes, shown for a moment after each boop -->
+          <g class="b-happy" opacity="0" fill="none" stroke="#1d1430" stroke-width="3" stroke-linecap="round">
+            <path d="M32 71q5-7 10 0"/><path d="M58 71q5-7 10 0"/>
+          </g>
+          <path d="M46.5 76.5h7c.8 0 1.2.9.7 1.5l-3.5 3.4c-.4.4-1 .4-1.4 0L45.8 78c-.5-.6-.1-1.5.7-1.5Z" fill="#f48fbf"/>
+          <path d="M50 81.5v2.5M43.5 83.5c2 3 6.5 3 6.5.5 0 2.5 4.5 2.5 6.5-.5" fill="none" stroke="#1d1430" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <h2 class="heading rise" style="--i:1">i got you a little gift, my love :p</h2>
+      <div class="gifts rise" style="--i:2">
+        <!-- each photo card is a bunny holding it: ears behind, paws in front.
+             temporary placeholders: replace each <div class="placeholder">…</div> with <img src="…" alt="…"> -->
+        <div class="gift">
+          <svg class="ear ear-l" viewBox="0 0 40 100" aria-hidden="true"><use href="#bunEar"/></svg>
+          <svg class="ear ear-r" viewBox="0 0 40 100" aria-hidden="true"><use href="#bunEar"/></svg>
+          <figure class="keepsake">
+            <div class="placeholder"><svg viewBox="0 0 100 104" aria-hidden="true"><use href="#bunHead"/></svg>photo 1</div>
+          </figure>
+          <svg class="paw paw-l" viewBox="0 0 44 34" aria-hidden="true"><use href="#bunPaw"/></svg>
+          <svg class="paw paw-r" viewBox="0 0 44 34" aria-hidden="true"><use href="#bunPaw"/></svg>
+        </div>
+        <div class="gift">
+          <svg class="ear ear-l" viewBox="0 0 40 100" aria-hidden="true"><use href="#bunEar"/></svg>
+          <svg class="ear ear-r" viewBox="0 0 40 100" aria-hidden="true"><use href="#bunEar"/></svg>
+          <figure class="keepsake">
+            <div class="placeholder"><svg viewBox="0 0 100 104" aria-hidden="true"><use href="#bunHead"/></svg>photo 2</div>
+          </figure>
+          <svg class="paw paw-l" viewBox="0 0 44 34" aria-hidden="true"><use href="#bunPaw"/></svg>
+          <svg class="paw paw-r" viewBox="0 0 44 34" aria-hidden="true"><use href="#bunPaw"/></svg>
+        </div>
+      </div>
+      <p class="love-line rise" style="--i:3">i love you so much, my bunny</p>
+      <div class="hops rise" style="--i:4" aria-hidden="true">
+        <svg class="print" viewBox="0 0 24 24"><use href="#pawPrint"/></svg>
+        <svg class="print" viewBox="0 0 24 24"><use href="#pawPrint"/></svg>
+        <svg class="print" viewBox="0 0 24 24"><use href="#pawPrint"/></svg>
+        <svg class="print" viewBox="0 0 24 24"><use href="#pawPrint"/></svg>
+        <svg class="print" viewBox="0 0 24 24"><use href="#pawPrint"/></svg>
+        <svg class="print" viewBox="0 0 24 24"><use href="#pawPrint"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- page 4 -->
+  <section class="slide" aria-label="one last question">
+    <div class="inner">
+      <figure class="keepsake dance rise" style="--i:0"><img src="assets/dance.jpg" alt="two anime characters dancing"></figure>
+      <h2 class="ask rise" style="--i:1">may i be your boyfriend?</h2>
+      <div class="ask-zone rise" style="--i:2" id="askZone">
+        <button class="btn btn-yes" id="yes">yes</button>
+        <button class="btn btn-no" id="no">no</button>
+        <span class="nope" id="nope" role="status">try the other option</span>
+      </div>
+      <div class="yay" id="yay" hidden>
+        <div class="yay-row">
+          <div class="big-heart"><img class="drawn" src="assets/heart-drawn.png" alt="hand-drawn heart"></div>
+          <figure class="keepsake yay-cat"><img src="assets/cat.jpg" alt="black cat"></figure>
+        </div>
+        <p class="yay-title">yay!! ♡</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="dots" id="dots"></div>
+
+<!-- gradients for the congratulations hearts and lilies -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="lilyFront" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#fbf7ff"/><stop offset=".45" stop-color="#ddcbfa"/><stop offset="1" stop-color="#a98be0"/>
+    </linearGradient>
+    <linearGradient id="lilyBack" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#efe4ff"/><stop offset="1" stop-color="#8a6bd1"/>
+    </linearGradient>
+    <radialGradient id="lilyThroat">
+      <stop offset="0" stop-color="#f3f7dc"/><stop offset="1" stop-color="#f3f7dc" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="heartA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#dcc9ff"/><stop offset="1" stop-color="#9b74e3"/></linearGradient>
+    <linearGradient id="heartB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c3a6f5"/><stop offset="1" stop-color="#6f47c4"/></linearGradient>
+    <linearGradient id="heartC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1e9ff"/><stop offset="1" stop-color="#b79cf0"/></linearGradient>
+
+    <!-- page 3 bunny pieces, outlined like the cat charms -->
+    <linearGradient id="bunFur" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#ece2fc"/></linearGradient>
+    <linearGradient id="bunPink" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd3e8"/><stop offset="1" stop-color="#f59cc8"/></linearGradient>
+    <symbol id="bunEar" viewBox="0 0 40 100">
+      <path d="M20 98C7 98 3 72 4.5 46 6 21 12 4 20 4s14 17 15.5 42C37 72 33 98 20 98Z" fill="url(#bunFur)" stroke="#1d1430" stroke-width="3"/>
+      <path d="M20 86c-6.5 0-8.5-19-7.6-38C13.2 30 16 16 20 16s6.8 14 7.6 32c.9 19-1.1 38-7.6 38Z" fill="url(#bunPink)"/>
+    </symbol>
+    <symbol id="bunPaw" viewBox="0 0 44 34">
+      <ellipse cx="22" cy="17" rx="19" ry="14.5" fill="url(#bunFur)" stroke="#1d1430" stroke-width="3"/>
+      <ellipse cx="22" cy="20.5" rx="5.4" ry="4.4" fill="#f7a6cd"/>
+      <circle cx="13.5" cy="12.5" r="2.7" fill="#f7a6cd"/><circle cx="22" cy="9.8" r="2.7" fill="#f7a6cd"/><circle cx="30.5" cy="12.5" r="2.7" fill="#f7a6cd"/>
+    </symbol>
+    <symbol id="bunHead" viewBox="0 0 100 104">
+      <g fill="url(#bunFur)" stroke="#1d1430" stroke-width="3" stroke-linejoin="round">
+        <path d="M35 50C25 48 20 30 22 16 23 6 28 2 32 4c5 3 9 16 9 30 0 9-2 16-6 16Z"/>
+        <path d="M65 50c10-2 15-20 13-34-1-10-6-14-10-12-5 3-9 16-9 30 0 9 2 16 6 16Z"/>
+      </g>
+      <path d="M33.5 42c-4.5-2-6.5-13-5.5-22 .5-6 3-9 5-8 3 2 5 10 5 19 0 7-1.5 11-4.5 11Z" fill="url(#bunPink)"/>
+      <path d="M66.5 42c4.5-2 6.5-13 5.5-22-.5-6-3-9-5-8-3 2-5 10-5 19 0 7 1.5 11 4.5 11Z" fill="url(#bunPink)"/>
+      <ellipse cx="50" cy="71" rx="36" ry="29" fill="url(#bunFur)" stroke="#1d1430" stroke-width="3"/>
+      <ellipse cx="27.5" cy="79" rx="7" ry="4.5" fill="#f9a8d0" opacity=".75"/>
+      <ellipse cx="72.5" cy="79" rx="7" ry="4.5" fill="#f9a8d0" opacity=".75"/>
+      <circle cx="37" cy="69" r="4.8" fill="#1d1430"/><circle cx="38.7" cy="67.3" r="1.7" fill="#fff"/>
+      <circle cx="63" cy="69" r="4.8" fill="#1d1430"/><circle cx="64.7" cy="67.3" r="1.7" fill="#fff"/>
+      <path d="M46.5 76.5h7c.8 0 1.2.9.7 1.5l-3.5 3.4c-.4.4-1 .4-1.4 0L45.8 78c-.5-.6-.1-1.5.7-1.5Z" fill="#f48fbf"/>
+      <path d="M50 81.5v2.5M43.5 83.5c2 3 6.5 3 6.5.5 0 2.5 4.5 2.5 6.5-.5" fill="none" stroke="#1d1430" stroke-width="2.2" stroke-linecap="round"/>
+    </symbol>
+    <!-- page 1: sparkle and a black cat ear -->
+    <symbol id="sparkle" viewBox="0 0 24 24">
+      <path d="M12 0c.8 7 4.2 11.2 12 12-7.8.8-11.2 4.2-12 12-.8-7.8-4.2-11.2-12-12 7.8-.8 11.2-5 12-12Z"/>
+    </symbol>
+    <symbol id="catEar" viewBox="0 0 40 48">
+      <path d="M3 46C5 30 11 11 18.5 3.5c.8-.8 2.2-.8 3 0C29 11 35 30 37 46Z" fill="#221b2b" stroke="#000" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M11 42c1.8-11 5-21 9-27 4 6 7.2 16 9 27Z" fill="url(#bunPink)"/>
+    </symbol>
+    <!-- three whiskers fanning out to the left from the right edge (mirrored for the other side) -->
+    <symbol id="whiskers" viewBox="0 0 60 34">
+      <g fill="none" stroke="#1d1430" stroke-width="2" stroke-linecap="round">
+        <path d="M58 13C40 9 20 6 2 4"/><path d="M58 17C40 17 20 17 2 18"/><path d="M58 21C40 25 20 29 3 32"/>
+      </g>
+    </symbol>
+    <symbol id="pawPrint" viewBox="0 0 24 24">
+      <ellipse cx="12" cy="15.5" rx="5" ry="4.2"/>
+      <circle cx="6.2" cy="9.6" r="2.2"/><circle cx="10" cy="6.2" r="2.2"/><circle cx="14" cy="6.2" r="2.2"/><circle cx="17.8" cy="9.6" r="2.2"/>
+    </symbol>
+  </defs>
+</svg>
+
+<script>
+  // fill these in: one per heart, in order (1 to 10)
+  const FAVORITE_THINGS = [
+    "i love your deep, dreamy brown eyes that i could stare into forever without getting tired", // 1
+    "i love your lovely voice that i could never get tired of hearing", // 2
+    "i love how you make everything funnier and more enjoyable", // 3
+    "i love your music taste and how every song shows me a small piece of you", // 4
+    "i love how we're so similar in some ways yet are so different in others, but even our differences pull us closer together", // 5
+    "i love how even stuff such as watching a show or movie together become some of my favorite things just because im sharing those moments with you", // 6
+    "i love how you make me want to try new things and experience stuff that i would've never tried on my own", // 7
+    "i love how obsessed we are with each other and how we never seem to get enough of one another and how we want to spend more time together even after hanging out all day.", // 8
+    "i love how every conversation we have feels meaningful and how i never find myself struggling to think of something to say to you", // 9
+    "i love how you've brought back my passion for so many things that i thought i'd lost and how you've made me excited to do them again.", // 10
+  ];
+  const PHOTO = "assets/din.jpg";
+  // the photo each heart puts in the middle when tapped (heart 1 brings back the first one)
+  const HEART_PHOTOS = [
+    PHOTO,                  // 1
+    "assets/photos/2.jpg",  // 2
+    "assets/photos/3.jpg",  // 3
+    "assets/photos/4.jpg",  // 4
+    "assets/photos/5.jpg",  // 5
+    "assets/photos/6.jpg",  // 6
+    "assets/photos/7.jpg",  // 7
+    "assets/photos/8.jpg",  // 8
+    "assets/photos/9.jpg",  // 9
+    "assets/photos/10.jpg", // 10
+  ];
+  // what's written on each heart (and its "no." label); hearts not listed just show their number
+  const HEART_NAMES = { 4: "444" };
+  const heartName = (i) => String(HEART_NAMES[i + 1] || i + 1);
+  const CHARM = "assets/3d/charm.webp";
+  const CHARM_OPEN = "assets/3d/charm-open.webp";
+
+  /* ---------- pager ---------- */
+  const slides = [...document.querySelectorAll(".slide")];
+  const prev = document.getElementById("prev");
+  const next = document.getElementById("next");
+  const cur = document.getElementById("cur");
+  const dots = document.getElementById("dots");
+  let index = 0;
+
+  document.getElementById("total").textContent = slides.length;
+  slides.forEach((_, i) => {
+    const d = document.createElement("button");
+    d.setAttribute("aria-label", `page ${i + 1}`);
+    d.addEventListener("click", () => go(i));
+    dots.appendChild(d);
+  });
+
+  // page switch: the old page fades and drifts the other way, the new one slides in a little
+  // and its pieces (.rise) come up one after another
+  const PAGE_EASE = "cubic-bezier(.2, .7, .2, 1)";
+  const pageAnims = new Map();   // slide -> animations we started, so a quick re-click can cancel them
+  let shown = null;
+  function play(slide, el, keyframes, opts) {
+    const a = el.animate(keyframes, opts);
+    if (!pageAnims.has(slide)) pageAnims.set(slide, []);
+    pageAnims.get(slide).push(a);
+    return a;
+  }
+
+  function go(n) {
+    index = Math.max(0, Math.min(slides.length - 1, n));
+    const from = shown, dir = from === null ? 1 : Math.sign(index - from) || 1;
+    shown = index;
+    slides.forEach((s, i) => {
+      (pageAnims.get(s) || []).forEach(a => a.cancel());
+      pageAnims.delete(s);
+      s.classList.remove("is-leaving");
+      s.classList.toggle("is-active", i === index);
+      s.inert = i !== index;
+    });
+    if (from !== null && from !== index) {
+      const old = slides[from];
+      old.classList.add("is-leaving");
+      play(old, old, [
+        { opacity: 1, transform: "none" },
+        { opacity: 0, transform: `translateX(${-dir * 36}px) scale(.985)` },
+      ], { duration: 380, easing: "ease-in", fill: "forwards" }).onfinish = () => old.classList.remove("is-leaving");
+    }
+    if (from !== index) {
+      const page = slides[index];
+      play(page, page, [
+        { opacity: 0, transform: `translateX(${dir * 36}px) scale(.985)` },
+        { opacity: 1, transform: "none" },
+      ], { duration: 560, easing: PAGE_EASE });
+      page.querySelectorAll(".rise").forEach(el => play(page, el, [
+        { opacity: 0, transform: "translateY(14px)" },
+        { opacity: 1, transform: "none" },
+      ], { duration: 700, delay: 140 + (parseInt(el.style.getPropertyValue("--i"), 10) || 0) * 90, easing: PAGE_EASE, fill: "backwards" }));
+    }
+    [...dots.children].forEach((d, i) => d.setAttribute("aria-current", i === index));
+    prev.disabled = index === 0;
+    next.disabled = index === slides.length - 1;
+    cur.textContent = index + 1;
+    history.replaceState(null, "", "#" + (index + 1));
+  }
+
+  prev.addEventListener("click", () => go(index - 1));
+  next.addEventListener("click", () => go(index + 1));
+  addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight" || e.key === "PageDown") go(index + 1);
+    if (e.key === "ArrowLeft" || e.key === "PageUp") go(index - 1);
+  });
+
+  let touch = null;
+  addEventListener("touchstart", (e) => { touch = e.touches[0]; }, { passive: true });
+  addEventListener("touchend", (e) => {
+    if (!touch) return;
+    const dx = e.changedTouches[0].clientX - touch.clientX;
+    const dy = e.changedTouches[0].clientY - touch.clientY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) go(index + (dx < 0 ? 1 : -1));
+    touch = null;
+  });
+
+  /* ---------- heart of favorite things ---------- */
+  const wrap = document.getElementById("heartWrap");
+  const sub = document.getElementById("sub");
+  const note = document.getElementById("note");
+  const noteLabel = document.getElementById("noteLabel");
+  const noteText = document.getElementById("noteText");
+  const opened = new Set();
+  const beads = [];
+
+  // classic parametric heart, sampled, then scaled into a 100-wide box
+  // (blender/render.py uses the same curve and box, so the chain render lines up with the charms)
+  const N = 720, PAD = 8, W = 100;
+  const raw = [];
+  for (let i = 0; i < N; i++) {
+    const t = (i / N) * Math.PI * 2, s = Math.sin(t);
+    raw.push([16 * s * s * s, -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t))]);
+  }
+  const minX = Math.min(...raw.map(p => p[0])), maxX = Math.max(...raw.map(p => p[0]));
+  const minY = Math.min(...raw.map(p => p[1])), maxY = Math.max(...raw.map(p => p[1]));
+  const k = (W - 2 * PAD) / (maxX - minX);
+  const H = (maxY - minY) * k + 2 * PAD;
+  const outer = raw.map(([x, y]) => [PAD + (x - minX) * k, PAD + (y - minY) * k]);
+  wrap.style.aspectRatio = `${W} / ${H.toFixed(2)}`;
+
+  // photo card in the middle, sized (in heart units) to clear the numbered hearts
+  // and sit just under the dip, so the heart wraps around it
+  const SNAP = { w: 34.5, h: 30, top: 29 };
+  const card = document.createElement("figure");
+  card.className = "snap";
+  card.style.left = (W / 2 - SNAP.w / 2) + "%";
+  card.style.top = (SNAP.top / H * 100) + "%";
+  card.style.width = SNAP.w + "%";
+  card.style.height = (SNAP.h / H * 100) + "%";
+  card.innerHTML = `<img src="${PHOTO}" alt="din">`;
+  wrap.appendChild(card);
+
+  // each swap the card tips over to the other side with a little pop, like it's being shuffled
+  // (Web Animations rather than CSS, so it still moves when the device asks for reduced motion)
+  let tilt = { x: 0, deg: -2.5 }, tiltSide = -1;
+  function wobble() {
+    const from = `translateX(${tilt.x}px) rotate(${tilt.deg}deg)`;
+    tiltSide = -tiltSide;
+    tilt = { x: tiltSide * (2 + Math.random() * 3), deg: tiltSide * (1.5 + Math.random() * 2) };
+    const to = `translateX(${tilt.x}px) rotate(${tilt.deg}deg)`;
+    card.animate(
+      [{ transform: from }, { transform: `${to} scale(1.04)`, offset: 0.5 }, { transform: to }],
+      { duration: 550, easing: "cubic-bezier(.3, .7, .3, 1)", fill: "forwards" }
+    );
+  }
+
+  function showPhoto(src) {
+    if (card.lastElementChild.getAttribute("src") === src) return;
+    wobble();
+    const next = new Image();
+    next.src = src;
+    next.alt = "din";
+    next.className = "incoming";
+    card.appendChild(next);
+    next.decode().catch(() => {}).then(() => {
+      requestAnimationFrame(() => next.classList.remove("incoming"));
+      // once it has faded in, drop whatever is underneath
+      setTimeout(() => { while (card.firstElementChild !== next) card.firstElementChild.remove(); }, 500);
+    });
+  }
+  // fetch them all early so a tap swaps instantly
+  addEventListener("load", () => HEART_PHOTOS.forEach(src => { new Image().src = src; }));
+
+  // spread beads clockwise along the outline: half down the right side, half up the left,
+  // leaving extra room at the top dip and bottom tip where the curve folds back
+  const len = [0];
+  for (let i = 1; i <= N; i++) {
+    const a = outer[i - 1], b = outer[i % N];
+    len.push(len[i - 1] + Math.hypot(b[0] - a[0], b[1] - a[1]));
+  }
+  function pointAt(d) {
+    let i = len.findIndex(v => v >= d);
+    if (i < 1) i = 1;
+    const a = outer[i - 1], b = outer[i % N], f = (d - len[i - 1]) / (len[i] - len[i - 1]);
+    return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
+  }
+
+  const half = Math.ceil(FAVORITE_THINGS.length / 2), EDGE_TOP = 0.085, EDGE_TIP = 0.075;
+  const side = i => EDGE_TOP + (0.5 - EDGE_TOP - EDGE_TIP) * (half > 1 ? i / (half - 1) : 0.5);
+  FAVORITE_THINGS.forEach((_, i) => {
+    const f = i < half ? side(i) : 1 - side(FAVORITE_THINGS.length - 1 - i);
+    const [x, y] = pointAt(len[N] * f);
+    const b = document.createElement("button");
+    b.className = "bead";
+    b.style.left = (x / W * 100) + "%";
+    b.style.top = (y / H * 100) + "%";
+    b.style.setProperty("--i", i);
+    b.setAttribute("aria-label", `favorite thing number ${heartName(i)}`);
+    b.setAttribute("aria-pressed", "false");
+    // each heart is its own cat charm (designs in blender/render.py, CAT_DESIGNS)
+    b.innerHTML = `<img class="charm" src="assets/3d/cats/${i + 1}.webp" alt="">`
+      + `<img class="charm charm-open" src="assets/3d/cats/${i + 1}-open.webp" alt="">`
+      + `<span${heartName(i).length > 2 ? ' class="long"' : ""}>${heartName(i)}</span>`;
+    b.addEventListener("click", () => { tapHeart(b); openThing(i); });
+    wrap.appendChild(b);
+    beads.push(b);
+  });
+
+  // line budget: up to ~125 characters gets 2 lines, longer gets 3. Shrink the font until
+  // it fits, but never below 17px (a phone is too narrow for that and just takes more lines)
+  function fitNote(text) {
+    const lines = text.length > 125 ? 3 : 2;
+    let size = 23;
+    noteText.style.fontSize = size + "px";
+    while (size > 17 && noteText.offsetHeight > size * 1.35 * lines + 2) {
+      size -= 0.5;
+      noteText.style.fontSize = size + "px";
+    }
+  }
+  addEventListener("resize", () => {
+    if (noteText.textContent) fitNote(noteText.classList.contains("is-empty") ? "" : noteText.textContent);
+  });
+
+  // every tap on a heart: a quick squish-and-wiggle, and a soft lavender ripple
+  // (scale/rotate are their own properties, so this stacks on the bead's centering transform)
+  function tapHeart(b) {
+    b.animate([
+      { scale: 1, rotate: "0deg" },
+      { scale: 0.86, rotate: "-6deg", offset: 0.25 },
+      { scale: 1.1, rotate: "5deg", offset: 0.55 },
+      { scale: 1, rotate: "0deg" },
+    ], { duration: 480, easing: "ease-out" });
+    const ring = document.createElement("span");
+    ring.className = "ripple";
+    b.appendChild(ring);
+    ring.animate([{ transform: "scale(.6)", opacity: 0.8 }, { transform: "scale(1.7)", opacity: 0 }],
+      { duration: 650, easing: "ease-out" }).onfinish = () => ring.remove();
+  }
+
+  /* ---------- opened counter ---------- */
+  // Web Animations again, so it still animates with reduced motion on
+  const pips = document.getElementById("pips");
+  const HEART_PATH = "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z";
+  const PIP = `<svg viewBox="0 0 24 24"><path d="${HEART_PATH}"/></svg>`;
+  FAVORITE_THINGS.forEach(() => pips.insertAdjacentHTML("beforeend", `<span class="pip">${PIP}</span>`));
+
+  function swapSub(html) {
+    sub.innerHTML = html;
+    sub.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }],
+      { duration: 400, easing: "ease-out" });
+  }
+  // the old number slides up and out while the new one springs up from below
+  function rollTo(n, total) {
+    const tick = sub.querySelector(".tick");
+    if (!tick) return swapSub(`<span class="tick"><b>${n}</b></span> of ${total} opened`);
+    const old = tick.lastElementChild, next = document.createElement("b");
+    next.textContent = n;
+    tick.appendChild(next);
+    old.animate([{ transform: "translateY(0)", opacity: 1 }, { transform: "translateY(-90%)", opacity: 0 }],
+      { duration: 300, easing: "ease-in", fill: "forwards" }).onfinish = () => old.remove();
+    next.animate([{ transform: "translateY(90%)", opacity: 0 }, { transform: "translateY(0)", opacity: 1 }],
+      { duration: 420, easing: "cubic-bezier(.3, 1.5, .5, 1)" });
+  }
+  function updateCounter(i, isNew) {
+    const pip = pips.children[i];
+    if (!isNew) {
+      // re-opening one just gives its little heart a nudge
+      pip.animate([{ transform: "scale(1)" }, { transform: "scale(1.3)" }, { transform: "scale(1)" }], { duration: 300 });
+      return;
+    }
+    pip.classList.add("on");
+    pip.animate([
+      { transform: "scale(.4)", filter: "drop-shadow(0 0 0 rgba(179, 154, 232, 0))" },
+      { transform: "scale(1.7)", filter: "drop-shadow(0 0 6px rgba(179, 154, 232, .95))", offset: 0.45 },
+      { transform: "scale(1)", filter: "drop-shadow(0 0 0 rgba(179, 154, 232, 0))" },
+    ], { duration: 600, easing: "cubic-bezier(.3, 1.3, .5, 1)" });
+
+    const total = FAVORITE_THINGS.length;
+    if (opened.size < total) return rollTo(opened.size, total);
+    swapSub(`all ${total} opened ♡`);
+    // all done: a wave runs across the row of hearts
+    [...pips.children].forEach((p, k) => p.animate(
+      [{ transform: "none" }, { transform: "translateY(-6px) scale(1.3)" }, { transform: "none" }],
+      { duration: 520, delay: 300 + k * 70, easing: "ease-in-out" }
+    ));
+  }
+
+  function openThing(i) {
+    const isNew = !opened.has(i);
+    opened.add(i);
+    showPhoto(HEART_PHOTOS[i] || PHOTO);
+    beads.forEach((b, j) => {
+      b.classList.toggle("is-open", opened.has(j));
+      b.classList.toggle("is-current", j === i);
+      b.setAttribute("aria-pressed", j === i);
+    });
+
+    const text = (FAVORITE_THINGS[i] || "").trim();
+    noteLabel.textContent = `no. ${heartName(i)}`;
+    noteText.textContent = text || "something sweet goes here";
+    noteText.classList.toggle("is-empty", !text);
+    fitNote(text);
+    note.classList.remove("swap");
+    void note.offsetWidth;
+    note.classList.add("swap");
+
+    const total = FAVORITE_THINGS.length;
+    updateCounter(i, isNew);
+    if (opened.size === total && !wrap.classList.contains("is-complete")) celebrate();
+  }
+
+  function celebrate() {
+    wrap.classList.add("is-complete");
+    setTimeout(congrats, 450);   // let the last charm pop and the counter wave start first
+  }
+
+  /* ---------- congratulations: purple hearts and lilies ---------- */
+  // gradients come from the hidden <svg> defs at the end of <body>
+  const LILY = (() => {
+    const PETAL = "M0-47C12-36 17-18 10-5 5 3-5 3-10-5-17-18-12-36 0-47Z";
+    const petals = (angles, fill) => angles.map(a => `<path d="${PETAL}" fill="${fill}" transform="rotate(${a})"/>`).join("");
+    const ribs = [30, 90, 150, 210, 270, 330].map(a => `<path d="M0-7V-38" transform="rotate(${a})"/>`).join("");
+    const spots = [90, 210, 330].map(a =>
+      `<g transform="rotate(${a})"><circle cx="2" cy="-13" r="1.3"/><circle cx="-2.5" cy="-18" r="1.1"/><circle cx="1.5" cy="-23" r="1"/></g>`).join("");
+    const stamens = [0, 60, 120, 180, 240, 300].map(a =>
+      `<g transform="rotate(${a + 15})"><path d="M0 0V-24"/><ellipse cy="-26" rx="1.7" ry="3.4" stroke="none"/></g>`).join("");
+    return `<svg viewBox="-50 -50 100 100"><g stroke="#7a52cc" stroke-opacity=".3" stroke-width=".8">`
+      + petals([30, 150, 270], "url(#lilyBack)") + petals([90, 210, 330], "url(#lilyFront)") + `</g>`
+      + `<g stroke="#fff" stroke-opacity=".6" stroke-width="1.1" fill="none">${ribs}</g>`
+      + `<g fill="#7b4bb5" fill-opacity=".55">${spots}</g>`
+      + `<circle r="9" fill="url(#lilyThroat)"/>`
+      + `<g stroke="#efe6cf" stroke-width="1.3" fill="#d9822b">${stamens}</g></svg>`;
+  })();
+  const purpleHeart = (g) => `<svg viewBox="0 0 24 24"><path d="${HEART_PATH}" fill="url(#${g})"/>`
+    + `<ellipse cx="7.6" cy="7.4" rx="2.6" ry="1.5" fill="#fff" fill-opacity=".45" transform="rotate(-35 7.6 7.4)"/></svg>`;
+
+  function piece(lily, size) {
+    const el = document.createElement("span");
+    el.className = "confetti";
+    el.style.width = el.style.height = size + "px";
+    el.innerHTML = lily ? LILY : purpleHeart(["heartA", "heartB", "heartC"][Math.floor(Math.random() * 3)]);
+    return el;
+  }
+
+  // Web Animations, so it plays even with reduced motion on
+  function congrats() {
+    const layer = document.createElement("div");
+    layer.className = "congrats";
+    layer.innerHTML = `<p class="congrats-title" role="status">good job, cutie ♡</p>`;
+    document.body.appendChild(layer);
+
+    // a soft lavender wash behind the message, then the message pops in, holds, and floats off
+    layer.animate([
+      { background: "rgba(241, 235, 252, 0)" },
+      { background: "rgba(241, 235, 252, .6)", offset: 0.15 },
+      { background: "rgba(241, 235, 252, .6)", offset: 0.75 },
+      { background: "rgba(241, 235, 252, 0)" },
+    ], { duration: 5200, fill: "forwards" });
+    layer.firstElementChild.animate([
+      { opacity: 0, transform: "scale(.6)" },
+      { opacity: 1, transform: "scale(1.08)", offset: 0.12 },
+      { opacity: 1, transform: "scale(1)", offset: 0.2 },
+      { opacity: 1, transform: "scale(1)", offset: 0.8 },
+      { opacity: 0, transform: "translateY(-10px) scale(.96)" },
+    ], { duration: 4600, delay: 250, easing: "ease-out", fill: "both" });
+
+    // hearts and lilies burst out of the chain heart...
+    const r = wrap.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height * 0.45;
+    const reach = Math.min(innerWidth, innerHeight) * 0.45;
+    for (let n = 0; n < 34; n++) {
+      const lily = n % 3 === 0;
+      const el = piece(lily, lily ? 34 + Math.random() * 26 : 14 + Math.random() * 16);
+      el.style.left = cx + "px";
+      el.style.top = cy + "px";
+      layer.appendChild(el);
+      const ang = Math.random() * Math.PI * 2, dist = 120 + Math.random() * reach;
+      const dx = Math.cos(ang) * dist, dy = Math.sin(ang) * dist * 0.8 - 60;
+      const rot = (Math.random() * 2 - 1) * 200;
+      el.animate([
+        { transform: "translate(-50%, -50%) scale(.2)", opacity: 0 },
+        { transform: `translate(calc(-50% + ${dx * 0.6}px), calc(-50% + ${dy * 0.6}px)) rotate(${rot * 0.4}deg)`, opacity: 1, offset: 0.2 },
+        { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(${rot * 0.7}deg)`, opacity: 1, offset: 0.5 },
+        { transform: `translate(calc(-50% + ${dx * 1.1}px), calc(-50% + ${dy + 260}px)) rotate(${rot}deg) scale(.9)`, opacity: 0 },
+      ], { duration: 2600 + Math.random() * 1200, easing: "cubic-bezier(.2, .7, .4, 1)", fill: "forwards" });
+    }
+    // ...then drift down from the top of the screen
+    for (let n = 0; n < 30; n++) {
+      const lily = n % 5 < 2;
+      const size = lily ? 30 + Math.random() * 30 : 12 + Math.random() * 16;
+      const el = piece(lily, size);
+      el.style.left = Math.random() * innerWidth + "px";
+      el.style.top = -size + "px";
+      layer.appendChild(el);
+      const sway = 20 + Math.random() * 40, fall = innerHeight + size * 2, rot = (Math.random() * 2 - 1) * 260;
+      el.animate([
+        { transform: "translate(0, 0)", opacity: 0 },
+        { transform: `translate(${sway}px, ${fall * 0.3}px) rotate(${rot * 0.3}deg)`, opacity: 1, offset: 0.25 },
+        { transform: `translate(${-sway * 0.6}px, ${fall * 0.65}px) rotate(${rot * 0.65}deg)`, opacity: 1, offset: 0.65 },
+        { transform: `translate(${sway * 0.4}px, ${fall}px) rotate(${rot}deg)`, opacity: 0.9 },
+      ], { duration: 3800 + Math.random() * 2200, delay: 500 + Math.random() * 1600, fill: "both" });
+    }
+    setTimeout(() => layer.remove(), 8400);
+  }
+
+  /* ---------- little ambient touches (Web Animations, so they move with reduced motion on too) ---------- */
+  const TWITCH = [
+    { transform: "none" },
+    { transform: "none", offset: 0.82 },
+    { transform: "rotate(9deg)", offset: 0.88 },
+    { transform: "rotate(-5deg)", offset: 0.94 },
+    { transform: "none" },
+  ];
+  // page 3: every so often a bunny ear twitches, each on its own beat
+  document.querySelectorAll(".ear").forEach((ear, k) => ear.animate(TWITCH,
+    { duration: 3200 + k * 450, delay: k * 600, iterations: Infinity, easing: "ease-in-out" }));
+  // page 1: the cat ears twitch too, but rarely
+  document.querySelectorAll(".cat-ear").forEach((ear, k) => ear.animate(TWITCH,
+    { duration: 5600 + k * 900, delay: 1800 + k * 1300, iterations: Infinity, easing: "ease-in-out" }));
+  // page 1: the cat tail sways slowly, and the whiskers give the odd twitch
+  document.querySelector(".cat-tail").animate(
+    [{ transform: "rotate(-5deg)" }, { transform: "rotate(6deg)" }],
+    { duration: 2600, iterations: Infinity, direction: "alternate", easing: "ease-in-out" });
+  document.querySelectorAll(".whiskers").forEach((w, k) => w.animate([
+    { transform: "none" }, { transform: "none", offset: 0.88 },
+    { transform: "rotate(-6deg)", offset: 0.93 }, { transform: "none" },
+  ], { duration: 4800, delay: 900 + k * 250, iterations: Infinity, easing: "ease-in-out" }));
+  // page 1: sparkles around the drawn heart softly twinkle
+  document.querySelectorAll(".sparkle").forEach((s, k) => s.animate([
+    { opacity: 0.25, transform: "scale(.6) rotate(0deg)" },
+    { opacity: 1, transform: "scale(1) rotate(20deg)", offset: 0.5 },
+    { opacity: 0.25, transform: "scale(.6) rotate(40deg)" },
+  ], { duration: 2000 + k * 500, delay: k * 400, iterations: Infinity, easing: "ease-in-out" }));
+  // the paw prints light up one after another, like little hops across the page
+  document.querySelectorAll(".print").forEach((p, k) => p.animate(
+    [{ opacity: 0.2 }, { opacity: 1, offset: 0.15 }, { opacity: 0.2, offset: 0.5 }, { opacity: 0.2 }],
+    { duration: 2400, delay: k * 220, iterations: Infinity }
+  ));
+
+  /* ---------- page 3: boop the bunny ---------- */
+  const bunnyBtn = document.getElementById("bunny");
+  const bunnySvg = bunnyBtn.querySelector("svg");
+  const [bunEarL, bunEarR] = bunnyBtn.querySelectorAll(".b-ear");
+  const bunEyes = bunnyBtn.querySelector(".b-eyes");
+  const bunHappy = bunnyBtn.querySelector(".b-happy");
+  const bunCheeks = bunnyBtn.querySelector(".b-cheeks");
+  // each tap plays the next move: happy hop, spin jump, wiggle, squish
+  const BUNNY_MOVES = [
+    [{ transform: "none" }, { transform: "scale(1.12, .86)", offset: 0.15 },
+     { transform: "translateY(-26px) scale(.92, 1.1)", offset: 0.45 }, { transform: "scale(1.1, .9)", offset: 0.75 }, { transform: "none" }],
+    [{ transform: "none" }, { transform: "scale(1.1, .9)", offset: 0.12 },
+     { transform: "translateY(-30px) rotate(180deg)", offset: 0.5 }, { transform: "rotate(360deg) scale(1.08, .92)", offset: 0.85 }, { transform: "rotate(360deg)" }],
+    [{ transform: "none" }, { transform: "rotate(-12deg)", offset: 0.2 }, { transform: "rotate(10deg)", offset: 0.4 },
+     { transform: "rotate(-8deg)", offset: 0.6 }, { transform: "rotate(5deg)", offset: 0.8 }, { transform: "none" }],
+    [{ transform: "none" }, { transform: "scale(1.25, .7)", offset: 0.3 }, { transform: "scale(.9, 1.15)", offset: 0.6 }, { transform: "none" }],
+  ];
+  let boops = 0;
+
+  bunnyBtn.addEventListener("click", () => {
+    const k = boops++;
+    bunnySvg.animate(BUNNY_MOVES[k % BUNNY_MOVES.length], { duration: 750, easing: "ease-in-out" });
+    // ears flop out and spring back
+    bunEarL.animate([{ transform: "none" }, { transform: "rotate(-28deg)", offset: 0.35 }, { transform: "rotate(10deg)", offset: 0.7 }, { transform: "none" }], { duration: 750 });
+    bunEarR.animate([{ transform: "none" }, { transform: "rotate(28deg)", offset: 0.35 }, { transform: "rotate(-10deg)", offset: 0.7 }, { transform: "none" }], { duration: 750 });
+    // happy ^ ^ eyes and puffed-up cheeks for a moment
+    bunEyes.animate([{ opacity: 0 }, { opacity: 0 }], { duration: 1100 });
+    bunHappy.animate([{ opacity: 1 }, { opacity: 1 }], { duration: 1100 });
+    bunCheeks.animate([{ transform: "none" }, { transform: "scale(1.3)", offset: 0.3 }, { transform: "none" }], { duration: 1100 });
+    // hearts float up out of the bunny
+    for (let n = 0; n < 5; n++) {
+      const h = document.createElement("span");
+      h.className = "bunny-heart";
+      h.innerHTML = `<svg viewBox="0 0 24 24"><path d="${HEART_PATH}" fill="${n % 2 ? "#f9a8d0" : "#b39ae8"}"/></svg>`;
+      bunnyBtn.appendChild(h);
+      const dx = (n - 2) * 16 + (Math.random() * 10 - 5), s = (0.6 + Math.random() * 0.6).toFixed(2);
+      h.animate([
+        { transform: "translate(-50%, 0) scale(.2)", opacity: 0 },
+        { transform: `translate(calc(-50% + ${dx * 0.5}px), -18px) scale(${s})`, opacity: 1, offset: 0.25 },
+        { transform: `translate(calc(-50% + ${dx}px), -62px) scale(${s}) rotate(${dx}deg)`, opacity: 0 },
+      ], { duration: 1100 + Math.random() * 300, delay: n * 60, easing: "ease-out", fill: "both" }).onfinish = () => h.remove();
+    }
+  });
+  // idle: it sits still, but an ear twitches now and then so it looks alive (and tappable)
+  bunEarR.animate(TWITCH, { duration: 6400, delay: 2500, iterations: Infinity, easing: "ease-in-out" });
+
+  /* ---------- the question: "no" runs away along an invisible heart around "yes" ---------- */
+  const zone = document.getElementById("askZone");
+  const yes = document.getElementById("yes");
+  const no = document.getElementById("no");
+  const yay = document.getElementById("yay");
+  const nope = document.getElementById("nope");
+  const YES_Y = 1;        // heart units (screen-down): balances clearance under the dip and the lower sides
+  const STRETCH = 1.4;    // taller than wide, so "no" never clips "yes" where the curve tucks in
+  let sx = 8, sy = 10, noT = 1.83, running = false, pointer = null, nopeTimer = 0;   // t = 1.83: level with "yes"
+
+  const heartAt = (t) => {
+    const s = Math.sin(t);
+    return [16 * s * s * s, -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t))];
+  };
+  function place(el, x, y) {
+    el.style.left = (zone.clientWidth / 2 + x * sx - el.offsetWidth / 2) + "px";
+    el.style.top = (no.offsetHeight / 2 + 4 + (y - minY) * sy - el.offsetHeight / 2) + "px";
+  }
+  function layoutAsk() {
+    // 8.2 is the smallest scale that keeps "no" clear of "yes"; short screens get close to it
+    sx = Math.min(innerHeight < 760 ? 8.6 : 9.5, (zone.clientWidth - no.offsetWidth - 8) / (maxX - minX));
+    sy = sx * STRETCH;
+    zone.style.height = ((maxY - minY) * sy + no.offsetHeight + 8) + "px";
+    place(yes, 0, YES_Y);
+    place(no, ...heartAt(noT));
+    placeNope();
+  }
+  // the message rides along with "no": above it, or below once "no" is under "yes"
+  function placeNope() {
+    const nx = parseFloat(no.style.left), ny = parseFloat(no.style.top);
+    const w = nope.offsetWidth, cx = nx + no.offsetWidth / 2;
+    const left = Math.max(-8, Math.min(zone.clientWidth - w + 8, cx - w / 2));
+    const below = heartAt(noT)[1] > YES_Y;
+    nope.classList.toggle("below", below);
+    nope.style.left = left + "px";
+    nope.style.top = (below ? ny + no.offsetHeight + 10 : ny - nope.offsetHeight - 10) + "px";
+    nope.style.setProperty("--tail", (cx - left) + "px");
+  }
+  function sayNope() {
+    nope.classList.add("show");
+    clearTimeout(nopeTimer);
+    nopeTimer = setTimeout(() => nope.classList.remove("show"), 1600);
+  }
+  function nearNo() {
+    if (!pointer) return false;
+    const r = no.getBoundingClientRect();
+    const dx = Math.max(r.left - pointer[0], 0, pointer[0] - r.right);
+    const dy = Math.max(r.top - pointer[1], 0, pointer[1] - r.bottom);
+    return Math.hypot(dx, dy) < 36;
+  }
+  // on short screens part of the heart is below the fold; don't stop there
+  function offscreen() {
+    const top = zone.getBoundingClientRect().top + parseFloat(no.style.top);
+    return top < 0 || top + no.offsetHeight > innerHeight;
+  }
+  // glide clockwise along the curve, so over a few escapes it traces a heart
+  function run(hops = 0) {
+    if (running) return;
+    running = true;
+    const from = noT, to = noT + 1.15, start = performance.now(), dur = 420;
+    const step = (now) => {
+      const p = Math.min(1, (now - start) / dur);
+      noT = from + (to - from) * (1 - Math.pow(1 - p, 3));
+      place(no, ...heartAt(noT));
+      placeNope();
+      if (p < 1) return requestAnimationFrame(step);
+      noT %= Math.PI * 2;
+      running = false;
+      if (nearNo() || (offscreen() && hops < 5)) run(hops + 1);
+    };
+    requestAnimationFrame(step);
+  }
+
+  addEventListener("pointermove", (e) => {
+    pointer = [e.clientX, e.clientY];
+    if (!zone.hidden && slides[index].contains(zone) && nearNo()) run();
+  });
+  // a tap or click on "no" (or a mouse closing in, which is the same attempt) gets the message
+  addEventListener("pointermove", () => { if (running) sayNope(); });
+  no.addEventListener("pointerdown", (e) => { e.preventDefault(); sayNope(); run(); });
+  no.addEventListener("click", (e) => { e.preventDefault(); sayNope(); run(); });
+
+  yes.addEventListener("click", () => {
+    burst(yes.getBoundingClientRect());
+    zone.hidden = true;
+    yay.hidden = false;
+  });
+
+  // silver and black charms fly up out of the yes button and fall away
+  function burst(r) {
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    for (let n = 0; n < 30; n++) {
+      const img = document.createElement("img");
+      img.className = "burst";
+      img.src = n % 3 ? CHARM : CHARM_OPEN;
+      img.alt = "";
+      img.style.left = cx + "px";
+      img.style.top = cy + "px";
+      document.body.appendChild(img);
+      const dx = (Math.random() * 2 - 1) * 240, dy = -(120 + Math.random() * 260);
+      const rot = (Math.random() * 2 - 1) * 240, s = (0.6 + Math.random() * 0.8).toFixed(2);
+      img.animate([
+        { transform: "translate(-50%, -50%) scale(.3)", opacity: 1 },
+        { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${s}) rotate(${rot / 2}deg)`, opacity: 1, offset: 0.45 },
+        { transform: `translate(calc(-50% + ${dx * 1.3}px), calc(-50% + ${dy + 420}px)) scale(${s}) rotate(${rot}deg)`, opacity: 0 },
+      ], { duration: 1900 + Math.random() * 700, easing: "cubic-bezier(.2, .6, .4, 1)", fill: "forwards" })
+        .onfinish = () => img.remove();
+    }
+  }
+
+  layoutAsk();
+  document.fonts.ready.then(layoutAsk);
+  addEventListener("resize", layoutAsk);
+
+  go((parseInt(location.hash.slice(1), 10) || 1) - 1);
+</script>
+</body>
+</html>
