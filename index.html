@@ -329,6 +329,14 @@
   .yay-cat img { object-position: 50% 45%; }
   .burst { position: fixed; width: 34px; height: 34px; pointer-events: none; z-index: 20; }
 
+  /* page 4 on phone-height screens (e.g. iPhone 16 Plus in Safari, ~800px visible): compact enough
+     that "no" can reach its bottom spot without going below the screen */
+  @media (max-height: 860px) {
+    .dance { width: min(150px, 40vw); margin-bottom: 12px; }
+    .ask { font-size: clamp(30px, 7vw, 46px); }
+    .ask-zone { margin-top: 12px; }
+  }
+
   /* short screens (small phones, laptop windows): shrink the pictures so pages still fit */
   @media (max-height: 760px) {
     .slide { padding-top: 100px; padding-bottom: 60px; }
@@ -1083,7 +1091,7 @@
   }
   function layoutAsk() {
     // 8.2 is the smallest scale that keeps "no" clear of "yes"; short screens get close to it
-    sx = Math.min(innerHeight < 760 ? 8.6 : 9.5, (zone.clientWidth - no.offsetWidth - 8) / (maxX - minX));
+    sx = Math.min(innerHeight < 860 ? 8.6 : 9.5, (zone.clientWidth - no.offsetWidth - 8) / (maxX - minX));
     sy = sx * STRETCH;
     zone.style.height = ((maxY - minY) * sy + no.offsetHeight + 8) + "px";
     place(yes, 0, YES_Y);
@@ -1119,11 +1127,11 @@
     return top < 0 || top + no.offsetHeight > innerHeight;
   }
   // glide clockwise along the curve, so over a few escapes it traces a heart
-  // On touch screens "no" only lands on these set spots around the heart (clockwise):
-  // right of "yes", lower right, lower left, left of "yes", upper-left lobe, upper-right lobe.
+  // On touch screens "no" only lands on these set spots around the heart, clockwise from the top:
+  // 3 along the top (top middle, upper right, ... upper left), 2 down each side, 1 at the bottom.
   // It still glides along the heart between them.
   const TOUCH = matchMedia("(hover: none), (pointer: coarse)").matches;
-  const SPOTS = [0.9, 1.83, 2.5, 3.78, 4.45, 5.38];
+  const SPOTS = [0, 0.9, 1.83, 2.5, Math.PI, 3.78, 4.45, 5.38];
   function nextSpot(t) {
     const base = Math.floor(t / (Math.PI * 2)) * Math.PI * 2, r = t - base;
     const s = SPOTS.find(v => v > r + 0.05);
