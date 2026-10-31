@@ -113,6 +113,7 @@
     mask: conic-gradient(from 0deg at 50% 45%, #000 var(--sketch), transparent 0);
     animation: sketch 1.3s ease-in-out .25s both, beat 2.6s ease-in-out 1.8s infinite;
   }
+  .yay .drawn { animation: sketch 1.3s ease-in-out .25s both; }  /* the last page's hearts stay still */
   @keyframes sketch { from { --sketch: 0deg; } }
   @keyframes beat {
     0%, 52%, 100% { transform: scale(1); }
@@ -361,6 +362,10 @@
   .m2 { left: -10%; top: 22%; font-size: 18px; }
   .m3 { right: -18%; top: 2%; font-size: 20px; }
   .m4 { right: -14%; top: 34%; font-size: 15px; }
+  .m5 { left: -16%; top: 62%; font-size: 20px; }
+  .m6 { right: -17%; top: 66%; font-size: 22px; }
+  .m7 { left: 18%; top: -17%; font-size: 16px; }
+  .m8 { right: 14%; bottom: -15%; font-size: 18px; }
   .yay-cat img { object-position: 50% 45%; }
   /* the love letter under "yay!! ♡" */
   .letter {
@@ -557,6 +562,10 @@
             <span class="menacing m2" aria-hidden="true">ゴ</span>
             <span class="menacing m3" aria-hidden="true">ゴ</span>
             <span class="menacing m4" aria-hidden="true">ゴ</span>
+            <span class="menacing m5" aria-hidden="true">ゴ</span>
+            <span class="menacing m6" aria-hidden="true">ゴ</span>
+            <span class="menacing m7" aria-hidden="true">ゴ</span>
+            <span class="menacing m8" aria-hidden="true">ゴ</span>
           </div>
           <div class="big-heart mirror"><img class="drawn" src="assets/heart-drawn.png" alt=""></div>
         </div>
@@ -1296,7 +1305,7 @@
       t.innerHTML = `<svg viewBox="0 0 24 24" fill="${n % 3 ? "#c9b2f3" : "#f3a6c8"}"><use href="#sparkle"/></svg>`;
       amb.appendChild(t);
       t.animate([{ opacity: 0.1, transform: "scale(.5) rotate(0deg)" }, { opacity: 0.9, transform: "scale(1) rotate(45deg)" }],
-        { duration: 1400 + Math.random() * 1800, delay: Math.random() * 3000, iterations: Infinity, direction: "alternate", easing: "ease-in-out" });
+        { duration: 1400 + Math.random() * 1800, delay: -Math.random() * 3000, iterations: Infinity, direction: "alternate", easing: "ease-in-out" });
     }
 
     for (let n = 0; n < 18; n++) {
@@ -1316,12 +1325,13 @@
         { transform: `translate(${sway}px, -30vh) rotate(20deg)`, opacity: 0.55, offset: 0.25 },
         { transform: `translate(${-sway * 0.6}px, -70vh) rotate(-15deg)`, opacity: 0.4, offset: 0.7 },
         { transform: `translate(${sway * 0.3}px, -110vh) rotate(10deg)`, opacity: 0 },
-      ], { duration: 9000 + Math.random() * 6000, delay: Math.random() * 9000, iterations: Infinity, easing: "linear" });
+      ], { duration: 9000 + Math.random() * 6000, delay: -Math.random() * 15000, iterations: Infinity, easing: "linear" });
     }
   })();
 
   // pages 1-3: themed bits drifting slowly up behind everything, kept faint so text stays easy to read.
-  // pick(n) returns [markup, size in px]
+  // pick(n) returns [markup, size in px]. Negative delays start each one partway up its path,
+  // so the page is already full of them the moment it opens.
   function drifters(slide, count, peak, pick) {
     const box = slide.querySelector(".ambient");
     for (let n = 0; n < count; n++) {
@@ -1338,7 +1348,7 @@
         { transform: `translate(${sway}px, -30vh) rotate(${spin}deg)`, opacity: peak, offset: 0.25 },
         { transform: `translate(${-sway * 0.6}px, -70vh) rotate(${-spin}deg)`, opacity: peak * 0.75, offset: 0.7 },
         { transform: `translate(${sway * 0.3}px, -110vh) rotate(${spin / 2}deg)`, opacity: 0 },
-      ], { duration: 10000 + Math.random() * 7000, delay: Math.random() * 10000, iterations: Infinity, easing: "linear" });
+      ], { duration: 10000 + Math.random() * 7000, delay: -Math.random() * 17000, iterations: Infinity, easing: "linear" });
     }
   }
   const rand = (a, b) => a + Math.random() * (b - a);
@@ -1382,9 +1392,6 @@
     }
     setTimeout(() => layer.remove(), 9800);
 
-    document.querySelectorAll(".yay .drawn").forEach((h, k) => h.animate([
-      { scale: 1 }, { scale: 1.12, offset: 0.14 }, { scale: 1, offset: 0.28 }, { scale: 1.07, offset: 0.42 }, { scale: 1, offset: 0.6 }, { scale: 1 },
-    ], { duration: 1400, delay: k * 220, iterations: Infinity, easing: "ease-in-out" }));
     document.querySelector(".jojo-burst").animate([{ rotate: "0deg" }, { rotate: "360deg" }],
       { duration: 24000, iterations: Infinity });
     document.querySelectorAll(".menacing").forEach((m, k) => m.animate([
