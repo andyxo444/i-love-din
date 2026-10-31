@@ -327,6 +327,14 @@
   .slide .yay .big-heart { width: 92px; margin-bottom: 0; }
   .yay-cat { width: min(132px, 34vw); aspect-ratio: 4 / 5; rotate: 3deg; }
   .yay-cat img { object-position: 50% 45%; }
+  /* the love letter under "yay!! ♡" */
+  .letter {
+    width: 100%; max-width: 30em; margin-top: 18px; padding: 18px 20px; border-radius: 18px;
+    background: #faf7ff; border: 1px solid #ebe2fb; box-shadow: 0 10px 28px rgba(var(--shadow), .12);
+    font-family: var(--serif); font-style: italic; font-size: clamp(17px, 4.4vw, 20px); line-height: 1.6;
+    color: var(--ink); text-align: left;
+  }
+  .letter[hidden] { display: none; }
   .burst { position: fixed; width: 34px; height: 34px; pointer-events: none; z-index: 20; }
 
   /* page 4 on phone-height screens (e.g. iPhone 16 Plus in Safari, ~800px visible): compact enough
@@ -505,6 +513,15 @@
           <figure class="keepsake yay-cat"><img src="assets/cat.jpg" alt="black cat"></figure>
         </div>
         <p class="yay-title">yay!! ♡</p>
+        <!-- shown once the top picture has faded away; each sentence fades in after the last -->
+        <div class="letter" id="letter" hidden>
+          <p><span>i pinky promise to love and cherish your pretty little heart for as long as you’ll let me.</span>
+            <span>you’re genuinely the sweetest girl i’ve ever met and i never want to lose what we have.</span>
+            <span>i’m so glad you said yes and i promise to do everything i can to make you feel loved, appreciated, and happy.</span>
+            <span>i won’t leave your side even on the hardest days because i don’t just want you when things are easy, i want you through all of it.</span>
+            <span>i want to grow with you, make memories with you, and love you for as long as you’ll have me.</span>
+            <span>i want this to be forever, din :3</span></p>
+        </div>
       </div>
     </div>
   </section>
@@ -1168,7 +1185,37 @@
     burst(yes.getBoundingClientRect());
     zone.hidden = true;
     yay.hidden = false;
+    foldAwayPicture();
   });
+
+  // after "yes": the picture at the top slowly fades, then folds away so the page closes up,
+  // then the letter appears one sentence at a time (Web Animations: plays with reduced motion on too)
+  const dance = document.querySelector(".dance");
+  const letter = document.getElementById("letter");
+  function foldAwayPicture() {
+    dance.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 1500, easing: "ease-in-out", fill: "forwards" })
+      .onfinish = () => {
+        const cs = getComputedStyle(dance);
+        dance.style.overflow = "hidden";
+        dance.animate([
+          { height: dance.offsetHeight + "px", marginBottom: cs.marginBottom, paddingTop: cs.paddingTop, paddingBottom: cs.paddingBottom },
+          { height: "0px", marginBottom: "0px", paddingTop: "0px", paddingBottom: "0px" },
+        ], { duration: 650, easing: "ease-in-out", fill: "forwards" }).onfinish = () => {
+          dance.style.display = "none";
+          revealLetter();
+        };
+      };
+  }
+  function revealLetter() {
+    letter.hidden = false;
+    letter.animate([{ opacity: 0, transform: "translateY(12px)" }, { opacity: 1, transform: "none" }],
+      { duration: 700, easing: "ease-out" });
+    letter.querySelectorAll("span").forEach((s, k) => s.animate([{ opacity: 0 }, { opacity: 1 }],
+      { duration: 900, delay: 500 + k * 700, easing: "ease-out", fill: "backwards" }));
+    // on a phone the letter starts below the fold: glide down so "yay!! ♡" and the letter are in view
+    const slide = letter.closest(".slide");
+    setTimeout(() => slide.scrollTo({ top: Math.max(0, document.querySelector(".yay-title").offsetTop - 90), behavior: "smooth" }), 300);
+  }
 
   // silver and black charms fly up out of the yes button and fall away
   function burst(r) {
