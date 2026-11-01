@@ -244,17 +244,18 @@
   .b-cheeks { transform-origin: 50% 50%; }
   .bunny-heart { position: absolute; left: 50%; top: 22%; width: 14px; height: 14px; pointer-events: none; }
   .bunny-heart svg { display: block; width: 100%; height: 100%; }
-  .gifts { display: flex; gap: 16px; justify-content: center; width: 100%; margin-top: 64px; }  /* room for the ears */
+  /* a little wider than the text column (into the side margins) so the cards can be bigger */
+  .gifts { display: flex; gap: 10px; justify-content: center; width: calc(100% + 16px); margin: 66px -8px 0; }  /* room for the ears */
   /* each card: bunny ears peeking from behind the top, paws holding the bottom edge.
      Wide (4:3) so the game screenshots show most of the picture */
-  .gift { position: relative; width: min(260px, calc(50% - 8px)); aspect-ratio: 4 / 3; }
+  .gift { position: relative; width: min(290px, calc(50% - 5px)); aspect-ratio: 4 / 3; }
   .gift:first-child { rotate: -3deg; }
   .gift:last-child { rotate: 3deg; }
   .gift > .keepsake { position: relative; z-index: 1; height: 100%; }
   .ear { position: absolute; z-index: 0; width: 15%; bottom: 82%; overflow: visible; transform-origin: 50% 92%; }
   .ear-l { left: 17%; rotate: -10deg; }
   .ear-r { right: 17%; rotate: 9deg; }
-  .gift:last-child .ear-r { rotate: 48deg; }  /* one floppy ear */
+  .gift:last-child .ear-r { rotate: 40deg; right: 26%; }  /* one floppy ear (tucked in so it stays on screen) */
   .paw { position: absolute; z-index: 2; width: 16%; bottom: -8%; overflow: visible; }
   .paw-l { left: 19%; }
   .paw-r { right: 19%; }
@@ -396,7 +397,7 @@
     .yay-cat { width: min(110px, 30vw); }
     .bunny { width: 48px; margin-bottom: 2px; }
     .gifts { margin-top: 56px; }
-    .gift { width: min(200px, calc(50% - 8px)); }
+    .gift { width: min(215px, calc(50% - 5px)); }
     .love-line { margin-top: 22px; }
     .hops { display: none; }
   }
