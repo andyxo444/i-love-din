@@ -290,12 +290,15 @@
     position: absolute; left: 0; top: 0; height: 48px; padding: 0 24px; border-radius: 999px;
     font-size: 16px; font-weight: 600; letter-spacing: .02em; white-space: nowrap;
   }
+  /* two lines, "yes," over a smaller "i love you :3", so it stays narrow enough for "no" to run around it */
   .btn-yes {
+    height: auto; padding: 6px 18px; line-height: 1.15;
     background: linear-gradient(135deg, #b9a0f0, var(--accent-deep)); color: #fff;
     box-shadow: 0 8px 22px rgba(138, 107, 209, .38);
     transition: transform .2s var(--ease), box-shadow .2s;
   }
   .btn-yes:hover { transform: scale(1.06); box-shadow: 0 10px 28px rgba(138, 107, 209, .5); }
+  .btn-yes small { display: block; font-size: 13px; font-weight: 600; letter-spacing: .01em; }
   .btn-no {
     background: #fff; color: var(--ink-2); border: 1px solid #ddd2f3;
     box-shadow: 0 6px 18px rgba(var(--shadow), .1);
@@ -522,7 +525,7 @@
         </div>
       </div>
       <p class="love-line rise" style="--i:3">i love you so much, my bunny</p>
-      <p class="gift-note rise" style="--i:4">i got you the battlepass too idk if you wanted it or not gulp</p>
+      <p class="gift-note rise" style="--i:4">i got you the ghost bundle thingy and the battlepass too idk if you even wanted it so gulp</p>
       <div class="hops rise" style="--i:4" aria-hidden="true">
         <svg class="print" viewBox="0 0 24 24"><use href="#pawPrint"/></svg>
         <svg class="print" viewBox="0 0 24 24"><use href="#pawPrint"/></svg>
@@ -541,7 +544,7 @@
       <figure class="keepsake dance rise" style="--i:0"><img src="assets/dance.jpg" alt="two anime characters dancing"></figure>
       <h2 class="ask rise" style="--i:1">may i be your boyfriend?</h2>
       <div class="ask-zone rise" style="--i:2" id="askZone">
-        <button class="btn btn-yes" id="yes">yes</button>
+        <button class="btn btn-yes" id="yes">yes, <small>i love you :3</small></button>
         <button class="btn btn-no" id="no">no</button>
         <span class="nope" id="nope" role="status">try the other option</span>
       </div>
